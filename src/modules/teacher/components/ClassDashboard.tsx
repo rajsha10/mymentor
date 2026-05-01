@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { getDoc, doc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../../../config/firebase';
-import { getClassroomLeaderboard, getClassroomWeakTopics, getClassroomAgentUsage } from '../../../services/backendApi';
-import { BarChart2, Users, TrendingUp, Zap, Brain, Activity, Loader, AlertTriangle, Star, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X, BookOpen, Eye, Flame, Target, Bot, MessageSquare, TrendingDown, FlaskConical, Upload, Share2, Clock } from 'lucide-react';
+import { getClassroomLeaderboard, getClassroomWeakTopics, getClassroomAgentUsage, listAgents } from '../../../services/backendApi';
+import { BarChart2, Users, TrendingUp, Zap, Brain, Activity, Loader, AlertTriangle, Star, ChevronUp, ChevronDown, ChevronsUpDown, Filter, X, BookOpen, Eye, Flame, Target, Bot, MessageSquare, TrendingDown, FlaskConical, Upload, Share2, Clock, Copy, Check } from 'lucide-react';
 
 type StudentEntry = {
   user_id: string;
@@ -243,7 +243,110 @@ function SortIcon({ col, sortKey, dir }: { col: SortKey; sortKey: SortKey; dir: 
     : <ChevronDown className="h-3.5 w-3.5 text-black" />;
 }
 
-export default function ClassDashboard({ classroom }: { classroom: any }) {
+// Share Agent Dialog
+function ShareAgentDialog({ visibleAgentIds, onClose }: { visibleAgentIds: string[]; onClose: () => void }) {
+  const [agents, setAgents] = useState<{ id: string; name: string; description: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  useEffect(() => {
+    listAgents()
+      .then(all => setAgents(all.filter(a => visibleAgentIds.includes(a.id))))
+      .catch(() => setAgents([]))
+      .finally(() => setLoading(false));
+  }, [visibleAgentIds]);
+
+  function copyLink(agentId: string) {
+    const url = `${window.location.origin}${window.location.pathname}?agent=${agentId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(agentId);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  }
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="bg-white border-2 border-black rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-md">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b-2 border-black bg-green-50 rounded-t-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-green-100 border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <Share2 className="h-4 w-4 text-black" />
+              </div>
+              <div>
+                <p className="font-extrabold text-black text-base leading-tight">Share Agent</p>
+                <p className="text-xs font-bold text-gray-400">Select an agent to share its link</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="px-6 py-5 space-y-3 max-h-80 overflow-y-auto">
+            {loading && (
+              <div className="flex items-center justify-center py-8 gap-3 text-gray-400">
+                <Loader className="h-5 w-5 animate-spin text-black" />
+                <p className="text-sm font-bold">Loading agents…</p>
+              </div>
+            )}
+            {!loading && agents.length === 0 && (
+              <div className="flex items-center gap-3 px-4 py-5 rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
+                <Bot className="h-5 w-5 shrink-0" />
+                <p className="text-sm font-bold">No agents are shared with this classroom yet.</p>
+              </div>
+            )}
+            {!loading && agents.map(agent => (
+              <div
+                key={agent.id}
+                className="flex items-center gap-3 p-4 rounded-xl border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+              >
+                <div className="w-9 h-9 rounded-full bg-purple-100 border-2 border-black flex items-center justify-center shrink-0">
+                  <Bot className="h-4 w-4 text-black" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-extrabold text-black text-sm truncate">{agent.name}</p>
+                  {agent.description && (
+                    <p className="text-xs text-gray-400 font-medium truncate">{agent.description}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => copyLink(agent.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 border-2 border-black rounded-full text-xs font-extrabold transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] shrink-0 ${
+                    copied === agent.id
+                      ? 'bg-green-400 text-black'
+                      : 'bg-white text-black hover:bg-black hover:text-white'
+                  }`}
+                >
+                  {copied === agent.id ? (
+                    <><Check className="h-3.5 w-3.5" /> Copied!</>
+                  ) : (
+                    <><Copy className="h-3.5 w-3.5" /> Copy Link</>
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t-2 border-black bg-brand-light rounded-b-2xl">
+            <p className="text-xs font-bold text-gray-400 text-center">
+              Students can open the link to chat directly with the selected agent.
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function ClassDashboard({ classroom, onNavigateTab }: { classroom: any; onNavigateTab?: (tab: string) => void }) {
   const [entries, setEntries] = useState<StudentEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -255,6 +358,7 @@ export default function ClassDashboard({ classroom }: { classroom: any }) {
   const [topicsLoading, setTopicsLoading] = useState(false);
   const [agentUsage, setAgentUsage] = useState<AgentUsage[]>([]);
   const [agentUsageLoading, setAgentUsageLoading] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -360,10 +464,7 @@ export default function ClassDashboard({ classroom }: { classroom: any }) {
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <button
-            onClick={() => {
-              const el = document.querySelector('[data-tab="agent"]') as HTMLButtonElement | null;
-              if (el) el.click();
-            }}
+            onClick={() => onNavigateTab?.('tests')}
             className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-all group"
           >
             <div className="w-11 h-11 rounded-full bg-[#FFF0EE] border-2 border-black flex items-center justify-center group-hover:bg-brand-coral shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -373,10 +474,7 @@ export default function ClassDashboard({ classroom }: { classroom: any }) {
           </button>
 
           <button
-            onClick={() => {
-              const el = document.querySelector('[data-tab="agent"]') as HTMLButtonElement | null;
-              if (el) el.click();
-            }}
+            onClick={() => onNavigateTab?.('materials')}
             className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-all group"
           >
             <div className="w-11 h-11 rounded-full bg-blue-100 border-2 border-black flex items-center justify-center group-hover:bg-blue-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -386,10 +484,7 @@ export default function ClassDashboard({ classroom }: { classroom: any }) {
           </button>
 
           <button
-            onClick={() => {
-              const el = document.querySelector('[data-tab="agent"]') as HTMLButtonElement | null;
-              if (el) el.click();
-            }}
+            onClick={() => setShareDialogOpen(true)}
             className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-white transition-all group"
           >
             <div className="w-11 h-11 rounded-full bg-green-100 border-2 border-black flex items-center justify-center group-hover:bg-green-400 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -1183,6 +1278,14 @@ export default function ClassDashboard({ classroom }: { classroom: any }) {
           student={selectedStudent}
           classroomFirestoreId={classroom.id}
           onClose={() => setSelectedStudent(null)}
+        />
+      )}
+
+      {/* Share Agent dialog */}
+      {shareDialogOpen && (
+        <ShareAgentDialog
+          visibleAgentIds={classroom.visibleAgentIds ?? []}
+          onClose={() => setShareDialogOpen(false)}
         />
       )}
     </div>

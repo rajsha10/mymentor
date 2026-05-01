@@ -41,7 +41,7 @@ function QuestionCard({ q, index }: { q: TestQuestion; index: number }) {
         </span>
       </div>
       <p className="font-bold text-black mb-3">{q.question}</p>
-      {q.options && (
+      {Array.isArray(q.options) && q.options.length > 0 && (
         <ul className="space-y-1 mb-3">
           {q.options.map((opt, i) => (
             <li

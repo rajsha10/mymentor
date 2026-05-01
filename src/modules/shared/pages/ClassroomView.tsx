@@ -105,7 +105,7 @@ export default function ClassroomView() {
       case 'activity':
         return <div className="p-6"><NotificationsPanel classroomId={classroom.id} /></div>;
       case 'classdashboard':
-        return <ClassDashboard classroom={classroom} />;
+        return <ClassDashboard classroom={classroom} onNavigateTab={setActiveTab} />;
       case 'agent':
         return <AgentPanel classroomName={classroom.name} classroomId={classroom.classroomId} firestoreId={classroom.id} visibleAgentIds={classroom.visibleAgentIds ?? []} />;
       case 'tests':

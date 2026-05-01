@@ -87,7 +87,7 @@ export default function TestModal({ topic, questions, onClose }: Props) {
                 {qi + 1}. {q.question}
               </p>
               <div className="space-y-2">
-                {q.options.map((opt, oi) => {
+                {(Array.isArray(q.options) ? q.options : []).map((opt, oi) => {
                   const letter = opt[0];
                   return (
                     <button
