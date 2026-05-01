@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Functions ---
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      // Sync with src/constants.ts - update this list manually or via deployment script
+      return isSignedIn() && request.auth.uid in ["M1zDIFD5tvPnMHc8ehd6XZEGnWj1"];
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasTeacherRole() {
+      let data = getUserData();
+      return isSignedIn() && (data.role == 'teacher' || isAdmin());
+    }
+
+    // Role Hierarchy check
+    function isCoordinatorOrHigher() {
+      let data = getUserData();
+      return isAdmin() || (data.role == 'teacher' && data.designation in ['subject_coordinator', 'head_teacher', 'headmaster']);
+    }
+
+    function isHeadmaster() {
+      let data = getUserData();
+      return isAdmin() || (data.role == 'teacher' && data.designation == 'headmaster');
+    }
+
+    // --- Collection Rules ---
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /classrooms/{classroomId} {
+      allow read: if isSignedIn();
+      allow create: if hasTeacherRole();
+      allow update: if hasTeacherRole() || isSignedIn(); // Students update pendingRequests
+      allow delete: if isAdmin();
+      
+      // Specifically allow chat messages for all signed-in users
+      match /messages/{messageId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.senderId);
+      }
+
+      // Allow students to upload SUBMISSIONS
+      match /homeworkSubmissions/{subId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+      }
+      match /assignmentSubmissions/{subId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update: if hasTeacherRole(); // Teachers grade them
+      }
+
+      // Rest of the subcollections (materials, homework, assignments)
+      match /{allSubcollections=**} {
+        allow read: if isSignedIn();
+        allow write: if hasTeacherRole();
+      }
+
+    }
+
+
+    // Notification Collections
+    match /notifications/{notifId} {
+      allow read: if isSignedIn();
+      allow create: if hasTeacherRole();
+      allow update, delete: if isAdmin();
+    }
+
+    match /adminNotifications/{notifId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn(); // System events like signup can be created by user
+      allow update, delete: if isAdmin();
+    }
+  }
+}
+
