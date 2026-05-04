@@ -15,7 +15,10 @@ import EmptyLearningProfile from '../components/EmptyLearningProfile';
 import ActivityTimeline from '../components/ActivityTimeline';
 import Leaderboard from '../components/Leaderboard';
 import { getLearningInsights } from '../../../services/backendApi';
-import { Bell, BookOpen, User, LayoutDashboard, LogOut, Plus, Video, Sparkles, Trophy } from 'lucide-react';
+import {
+  Bell, BookOpen, User, LayoutDashboard, LogOut, Plus, Video,
+  Sparkles, Trophy, ChevronRight, X, Clock, Menu,
+} from 'lucide-react';
 
 type LearningInsights = {
   by_classroom: {
@@ -36,6 +39,7 @@ export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState<'home' | 'meetings' | 'agents' | 'profile' | 'leaderboard'>('home');
   const [insights, setInsights] = useState<LearningInsights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -48,42 +52,31 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     if (!user) return;
-
     const q = query(collection(db, 'classrooms'));
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const allClassrooms = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as any[];
-
-      const userClassrooms = allClassrooms.filter(c =>
-        c.students?.some((s: any) => s.uid === user.uid)
-      );
-
-      const userPendingClassrooms = allClassrooms.filter(c =>
-        c.pendingRequests?.some((p: any) => p.uid === user.uid)
-      );
-
-      setClassrooms(userClassrooms);
-      setPendingClassrooms(userPendingClassrooms);
+      const all = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+      setClassrooms(all.filter(c => c.students?.some((s: any) => s.uid === user.uid)));
+      setPendingClassrooms(all.filter(c => c.pendingRequests?.some((p: any) => p.uid === user.uid)));
     });
-
     return () => unsubscribe();
   }, [user]);
 
   const handleLogout = () => { signOut(auth); };
 
+  const switchTab = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    setSidebarOpen(false);
+  };
+
   const formatLastActivity = (iso: string | null) => {
-    if (!iso) return 'No activity yet';
+    if (!iso) return 'No activity';
     const diff = Date.now() - new Date(iso).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+    if (mins < 60) return `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs} hour${hrs === 1 ? '' : 's'} ago`;
-    const days = Math.floor(hrs / 24);
-    return `${days} day${days === 1 ? '' : 's'} ago`;
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
   };
 
   const confidenceDot = (level: string) => {
@@ -92,288 +85,312 @@ export default function StudentDashboard() {
     return '🟡';
   };
 
-  return (
-    <div className="min-h-screen bg-brand-light flex flex-col font-sans text-black">
-      <nav className="bg-brand-light border-b-2 border-black sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center">
-                <img src="/logo.png" alt="MyMentor Logo" className="h-48 w-auto object-contain" />
+  const liveCount = classrooms.filter(c => c.meetingActive).length;
+
+  const bottomNavTabs = [
+    { id: 'home' as const,        label: 'Home',     Icon: LayoutDashboard },
+    { id: 'agents' as const,      label: 'Agents',   Icon: Sparkles },
+    { id: 'meetings' as const,    label: 'Live',     Icon: Video },
+    { id: 'leaderboard' as const, label: 'Ranks',    Icon: Trophy },
+    { id: 'profile' as const,     label: 'Profile',  Icon: User },
+  ];
+
+  const desktopNavTabs = [
+    { id: 'home' as const,        label: 'Dashboard',    Icon: LayoutDashboard },
+    { id: 'profile' as const,     label: 'Profile',      Icon: User },
+    { id: 'agents' as const,      label: 'My Agents',    Icon: Sparkles },
+    { id: 'meetings' as const,    label: 'Live Classes', Icon: Video },
+    { id: 'leaderboard' as const, label: 'Leaderboard',  Icon: Trophy },
+  ];
+
+  /* ─────────────────────────── Sidebar ─────────────────────── */
+
+  const sidebar = (
+    <>
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar panel */}
+      <aside
+        className={`
+          fixed top-0 left-0 z-40 h-screen w-72
+          lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:z-auto lg:translate-x-0
+          bg-white border-r-2 border-black flex flex-col
+          transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
+        {/* ── Header ─────────────────────────── */}
+        <div className="px-5 py-4 border-b-2 border-black shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-black border-2 border-black rounded-lg flex items-center justify-center">
+                <BookOpen className="h-3.5 w-3.5 text-white" />
               </div>
-              <div className="hidden md:flex space-x-4">
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className={`px-5 py-2.5 text-sm font-bold rounded-full flex items-center border border-black transition-colors ${activeTab === 'home' ? 'bg-black text-white' : 'bg-transparent text-black hover:bg-gray-100'}`}
+              <span className="text-sm font-extrabold text-black">My Classrooms</span>
+              {classrooms.length > 0 && (
+                <span className="px-2 py-0.5 bg-[#FF6B57] border-2 border-black rounded-full text-[10px] font-extrabold leading-none">
+                  {classrooms.length}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setShowJoin(!showJoin)}
+                className={`w-7 h-7 rounded-full border-2 border-black flex items-center justify-center transition-colors ${
+                  showJoin ? 'bg-black text-white' : 'hover:bg-[#FF6B57]'
+                }`}
+                title={showJoin ? 'Cancel' : 'Join a classroom'}
+              >
+                {showJoin ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+              </button>
+              {/* Close button — mobile only */}
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden w-7 h-7 rounded-full border-2 border-black flex items-center justify-center hover:bg-gray-100 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Inline join form */}
+          {showJoin && (
+            <div className="mt-3 p-4 bg-[#FAFAFA] border-2 border-black rounded-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <JoinClassroom onJoined={() => setShowJoin(false)} />
+            </div>
+          )}
+        </div>
+
+        {/* ── Classroom list ──────────────────── */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-1">
+          {classrooms.length === 0 && pendingClassrooms.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+              <div className="w-12 h-12 bg-[#FAFAFA] border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center mb-3">
+                <BookOpen className="h-5 w-5 text-gray-300" />
+              </div>
+              <p className="text-xs font-extrabold text-gray-400 mb-1">No classrooms yet</p>
+              <p className="text-[10px] text-gray-400 font-medium leading-relaxed">
+                Tap <span className="font-bold">+</span> above to join your first class.
+              </p>
+            </div>
+          ) : (
+            <>
+              {classrooms.map(c => (
+                <Link
+                  key={c.id}
+                  to={`/classroom/${c.id}`}
+                  onClick={() => setSidebarOpen(false)}
+                  className="group flex items-center gap-3 px-3 py-3 rounded-xl border-2 border-transparent hover:border-black hover:bg-white hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
                 >
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
-                </button>
+                  <div className="w-9 h-9 shrink-0 bg-[#FF6B57]/10 border-2 border-black rounded-xl flex items-center justify-center group-hover:bg-[#FF6B57] transition-colors">
+                    <BookOpen className="h-4 w-4 text-black" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-extrabold text-sm text-black truncate leading-tight">{c.name}</span>
+                      {c.meetingActive && (
+                        <span className="shrink-0 w-2 h-2 bg-[#FF6B57] rounded-full border border-black animate-pulse" />
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 font-medium truncate mt-0.5">{c.subject}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-black shrink-0 transition-colors" />
+                </Link>
+              ))}
+
+              {pendingClassrooms.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 px-3 pt-3 pb-1">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Pending</span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                  </div>
+                  {pendingClassrooms.map(c => (
+                    <div key={`p-${c.id}`} className="flex items-center gap-3 px-3 py-3 rounded-xl opacity-60">
+                      <div className="w-9 h-9 shrink-0 bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-extrabold text-sm text-gray-500 truncate block leading-tight">{c.name}</span>
+                        <p className="text-xs text-gray-400 font-medium mt-0.5">Awaiting approval</p>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* ── Live banner ─────────────────────── */}
+        {liveCount > 0 && (
+          <div
+            onClick={() => { switchTab('meetings'); }}
+            className="m-3 flex items-center gap-3 px-4 py-3 bg-[#FF6B57] border-2 border-black rounded-2xl shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer hover:bg-[#FF8A7A] transition-colors"
+          >
+            <span className="w-2.5 h-2.5 bg-black rounded-full animate-pulse shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-extrabold text-black leading-tight">
+                {liveCount} Live Session{liveCount > 1 ? 's' : ''}
+              </p>
+              <p className="text-[10px] font-bold text-black/60">Tap to join</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-black shrink-0" />
+          </div>
+        )}
+      </aside>
+    </>
+  );
+
+  /* ─────────────────────────── Render ──────────────────────── */
+
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] flex flex-col font-sans text-black">
+
+      {/* ── Top Navigation ─────────────────────────────────────── */}
+      <nav className="bg-white border-b-2 border-black sticky top-0 z-20">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-20">
+
+            {/* Left: hamburger (mobile, home tab) + logo + desktop tabs */}
+            <div className="flex items-center gap-2">
+              {activeTab === 'home' && (
                 <button
-                  onClick={() => setActiveTab('profile')}
-                  className={`px-5 py-2.5 text-sm font-bold rounded-full flex items-center border border-black transition-colors ${activeTab === 'profile' ? 'bg-black text-white' : 'bg-transparent text-black hover:bg-gray-100'}`}
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden w-9 h-9 rounded-full border-2 border-black flex items-center justify-center hover:bg-[#FF6B57] transition-colors shrink-0"
+                  aria-label="Open classrooms"
                 >
-                  <User className="h-4 w-4 mr-2" />
-                  My Profile
+                  <Menu className="h-4 w-4" />
                 </button>
-                <button
-                  onClick={() => setActiveTab('agents')}
-                  className={`px-5 py-2.5 text-sm font-bold rounded-full flex items-center border border-black transition-colors ${activeTab === 'agents' ? 'bg-black text-white shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]' : 'bg-transparent text-black hover:bg-gray-100'}`}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  My Agents
-                </button>
-                <button
-                  onClick={() => setActiveTab('meetings')}
-                  className={`px-5 py-2.5 text-sm font-bold rounded-full flex items-center border border-black transition-colors ${activeTab === 'meetings' ? 'bg-brand-coral text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-transparent text-black hover:bg-gray-100'}`}
-                >
-                  <Video className="h-4 w-4 mr-2" />
-                  Live Classes
-                  {classrooms.filter(c => c.meetingActive).length > 0 && (
-                    <span className="ml-2 bg-black text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold animate-pulse">
-                      {classrooms.filter(c => c.meetingActive).length}
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('leaderboard')}
-                  className={`px-5 py-2.5 text-sm font-bold rounded-full flex items-center border border-black transition-colors ${activeTab === 'leaderboard' ? 'bg-yellow-400 text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]' : 'bg-transparent text-black hover:bg-gray-100'}`}
-                >
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Leaderboard
-                </button>
+              )}
+              <img src="/logo.png" alt="MyMentor" className="h-48 w-auto object-contain" />
+              {/* Desktop tab pills */}
+              <div className="hidden lg:flex items-center gap-1 bg-[#FAFAFA] border-2 border-black rounded-full p-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.06)]">
+                {desktopNavTabs.map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => switchTab(id)}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                      activeTab === id
+                        ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]'
+                        : 'text-gray-500 hover:bg-white hover:text-black'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                    {id === 'meetings' && liveCount > 0 && (
+                      <span className="bg-[#FF6B57] text-black w-4 h-4 rounded-full text-[9px] font-extrabold flex items-center justify-center border border-black animate-pulse">
+                        {liveCount}
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="flex items-center space-x-6">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-black">{userData?.name}</p>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student</p>
+
+            {/* Right: user info + avatar + logout */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="hidden sm:flex flex-col items-end">
+                <span className="text-sm font-extrabold leading-tight text-black">{userData?.name}</span>
+                <span className="text-[10px] font-extrabold text-[#FF6B57] uppercase tracking-widest">Student</span>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-[#FF6B57] border-2 border-black flex items-center justify-center font-extrabold text-sm text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                {userData?.name?.charAt(0)?.toUpperCase() ?? 'S'}
               </div>
               <button
                 onClick={handleLogout}
-                className="w-10 h-10 rounded-full border border-black flex items-center justify-center hover:bg-brand-coral hover:text-white transition-colors"
+                className="w-9 h-9 rounded-full border-2 border-black flex items-center justify-center hover:bg-[#FF6B57] transition-colors"
                 title="Logout"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5" />
               </button>
             </div>
+
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
-        {activeTab === 'profile' ? (
-          <Profile />
-        ) : activeTab === 'agents' ? (
-          <PersonalAgentPanel />
-        ) : activeTab === 'leaderboard' ? (
-          <div className="max-w-3xl mx-auto">
-            <Leaderboard
-              classrooms={classrooms.map(c => ({
-                id: c.id,
-                name: c.name,
-                subject: c.subject,
-                students: c.students ?? [],
-              }))}
-              currentUserId={user?.uid ?? ''}
-            />
-          </div>
-        ) : activeTab === 'meetings' ? (
-          <div className="space-y-8">
-            <h2 className="text-6xl tracking-tight font-extrabold text-black">Live Classes</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {classrooms.filter(c => c.meetingActive).length > 0 ? (
-                classrooms.filter(c => c.meetingActive).map(classroom => (
-                  <div key={classroom.id} className="bg-white p-8 rounded-4xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] relative flex flex-col justify-between hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all">
-                    <div className="absolute -top-3 -right-3 z-10">
-                      <span className="flex items-center px-4 py-2 bg-brand-coral text-black border-2 border-black rounded-full text-xs font-extrabold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] animate-bounce">
-                        <Video className="h-3 w-3 mr-1" />
-                        Live Now
-                      </span>
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-4 mb-6">
-                        <div className="p-3 bg-gray-100 rounded-full text-black border border-black">
-                          <Video className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-extrabold text-black">{classroom.name}</h3>
-                          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">{classroom.subject}</p>
-                        </div>
-                      </div>
-                      <p className="text-base text-gray-600 mb-8 font-medium">Your teacher has started a live session. Join now to participate.</p>
-                    </div>
-                    <a
-                      href={classroom.meetingLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full inline-flex items-center justify-center px-6 py-4 border-2 border-black text-lg font-bold rounded-full text-white bg-black hover:bg-gray-800 transition-colors"
-                    >
-                      Join Meeting Now
-                    </a>
+      {/* ── Body ───────────────────────────────────────────────── */}
+      {activeTab === 'home' ? (
+
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left sidebar */}
+          {sidebar}
+
+          {/* Main scrollable content */}
+          <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+            <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-10 space-y-6 lg:space-y-8">
+
+              {/* Welcome hero */}
+              <div className="relative bg-black text-white rounded-[1.5rem] sm:rounded-[2rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,107,87,1)] sm:shadow-[6px_6px_0px_0px_rgba(255,107,87,1)] overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 sm:w-2 bg-[#FF6B57]" />
+                <div className="p-5 pl-7 sm:p-8 sm:pl-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+                  <div>
+                    <p className="text-[10px] sm:text-xs font-extrabold uppercase tracking-widest text-[#FF6B57] mb-1.5 sm:mb-2">Welcome back</p>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
+                      {userData?.name?.split(' ')[0]} 👋
+                    </h1>
+                    <p className="text-gray-400 text-xs sm:text-sm font-medium mt-1.5 sm:mt-2">Here's your learning overview for today</p>
                   </div>
-                ))
+                  <div className="flex gap-2 sm:gap-3 sm:shrink-0">
+                    <div className="flex-1 sm:flex-none bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-3 sm:py-4 text-center">
+                      <p className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1 sm:mb-2">Confidence</p>
+                      <p className="text-sm sm:text-base font-extrabold leading-none">
+                        {insightsLoading ? '…' : insights ? `${confidenceDot(insights.overall_confidence)} ${insights.overall_confidence}` : '—'}
+                      </p>
+                    </div>
+                    <div className="flex-1 sm:flex-none bg-white/10 border border-white/20 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-3 sm:py-4 text-center">
+                      <p className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-gray-400 mb-1 sm:mb-2">Last Active</p>
+                      <p className="text-sm sm:text-base font-extrabold leading-none">
+                        {insightsLoading ? '…' : insights ? formatLastActivity(insights.last_activity) : '—'}
+                      </p>
+                    </div>
+                    <div className="flex-1 sm:flex-none bg-[#FF6B57]/20 border border-[#FF6B57]/40 rounded-xl sm:rounded-2xl px-3 sm:px-5 py-3 sm:py-4 text-center">
+                      <p className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-[#FF6B57] mb-1 sm:mb-2">Queries</p>
+                      <p className="text-sm sm:text-base font-extrabold leading-none">
+                        {insightsLoading ? '…' : insights ? insights.total_queries : '—'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Learning analytics */}
+              {insightsLoading ? (
+                <ScoreDashboard insights={{ by_classroom: [], overall_confidence: 'Medium', last_activity: null, total_queries: 0 }} loading={true} />
+              ) : insights && insights.total_queries > 0 ? (
+                <>
+                  <ScoreDashboard insights={insights} loading={false} />
+                  <ScoreGraph />
+                </>
               ) : (
-                <div className="col-span-full py-16 bg-white rounded-4xl border-2 border-black border-dashed text-center flex flex-col items-center justify-center px-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center border border-black mb-4">
-                    <Video className="h-8 w-8 text-black" />
-                  </div>
-                  <p className="text-xl font-bold text-black mb-2">No live classes</p>
-                  <p className="text-gray-500 font-medium">There are no live sessions currently in progress.</p>
-                </div>
+                <EmptyLearningProfile name={userData?.name?.split(' ')[0]} />
               )}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-10">
 
-            {/* ── ROW 1: Welcome + Stats bar ─────────────────────────────── */}
-            <div className="bg-black text-white rounded-4xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(255,107,87,1)] p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-              <div>
-                <p className="text-3xl font-extrabold tracking-tight">Welcome back, {userData?.name?.split(' ')[0]} 👋</p>
-                <p className="text-gray-400 text-sm font-medium mt-1">Here's your learning snapshot for today.</p>
-              </div>
-              <div className="flex flex-wrap gap-4 sm:shrink-0">
-                <div className="bg-white/10 border border-white/20 rounded-2xl px-5 py-3 text-center min-w-25">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Confidence</p>
-                  <p className="text-lg font-extrabold">
-                    {insightsLoading ? '…' : insights ? `${confidenceDot(insights.overall_confidence)} ${insights.overall_confidence}` : '—'}
-                  </p>
-                </div>
-                <div className="bg-white/10 border border-white/20 rounded-2xl px-5 py-3 text-center min-w-25">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Last Active</p>
-                  <p className="text-lg font-extrabold">
-                    {insightsLoading ? '…' : insights ? formatLastActivity(insights.last_activity) : '—'}
-                  </p>
-                </div>
-                <div className="bg-white/10 border border-white/20 rounded-2xl px-5 py-3 text-center min-w-25">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Queries</p>
-                  <p className="text-lg font-extrabold">
-                    {insightsLoading ? '…' : insights ? insights.total_queries : '—'}
-                  </p>
-                </div>
-              </div>
-            </div>
+              {/* Weak areas */}
+              <WeakAreasDashboard
+                insights={insights ?? { by_classroom: [], total_queries: 0 }}
+                classrooms={classrooms}
+                loading={insightsLoading}
+              />
 
-            {/* ── ROW 2: Score section — empty state OR dashboard + graph ─── */}
-            {insightsLoading ? (
-              <ScoreDashboard insights={{ by_classroom: [], overall_confidence: 'Medium', last_activity: null, total_queries: 0 }} loading={true} />
-            ) : insights && insights.total_queries > 0 ? (
-              <>
-                <ScoreDashboard insights={insights} loading={false} />
-                <ScoreGraph />
-              </>
-            ) : (
-              <EmptyLearningProfile name={userData?.name?.split(' ')[0]} />
-            )}
-
-            {/* ── ROW 4: Weak Areas Dashboard ─────────────────────────────── */}
-            <WeakAreasDashboard
-              insights={insights ?? { by_classroom: [], total_queries: 0 }}
-              classrooms={classrooms}
-              loading={insightsLoading}
-            />
-
-            {/* ── ROW 5: Classrooms (left) + Right column ─────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-              {/* Classrooms — 2/3 width */}
-              <div className="lg:col-span-2 space-y-8">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                  <h2 className="text-4xl tracking-tight font-extrabold text-black">My Classrooms</h2>
-                  <button
-                    onClick={() => setShowJoin(!showJoin)}
-                    className="inline-flex items-center px-6 py-3 bg-brand-coral text-black text-sm font-bold rounded-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] transition-all"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {showJoin ? 'Cancel' : 'Join Classroom'}
-                  </button>
-                </div>
-
-                {showJoin && (
-                  <div className="p-8 bg-white border-2 border-black rounded-4xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                    <JoinClassroom onJoined={() => setShowJoin(false)} />
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  {classrooms.map((classroom) => (
-                    <Link
-                      key={classroom.id}
-                      to={`/classroom/${classroom.id}`}
-                      className="group bg-white p-7 rounded-4xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex justify-between items-start mb-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-11 h-11 flex items-center justify-center bg-gray-100 rounded-full border border-black group-hover:bg-brand-coral transition-colors">
-                              <BookOpen className="h-5 w-5" />
-                            </div>
-                            {classroom.meetingActive && (
-                              <div className="flex items-center px-3 py-1 bg-brand-coral text-black border border-black rounded-full text-[10px] font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                                <Video className="h-3 w-3 mr-1" />
-                                Live
-                              </div>
-                            )}
-                          </div>
-                          <span className="px-3 py-1 rounded-full border border-gray-300 text-xs font-bold font-mono text-gray-400">
-                            {classroom.classroomId}
-                          </span>
-                        </div>
-                        <h3 className="text-xl font-extrabold text-black mb-1">{classroom.name}</h3>
-                        <p className="text-gray-500 text-sm font-medium">Teacher: {classroom.teacherName || 'Faculty'}</p>
-                      </div>
-                      <div className="mt-6 pt-5 border-t-2 border-gray-100 flex items-center justify-between">
-                        <span className="text-sm font-bold text-black border-b-2 border-transparent group-hover:border-black transition-colors pb-0.5">Open →</span>
-                        <span className="bg-gray-100 px-3 py-1 rounded-full text-xs font-bold border border-gray-200 text-gray-600">{classroom.subject}</span>
-                      </div>
-                    </Link>
-                  ))}
-
-                  {pendingClassrooms.map((classroom) => (
-                    <div
-                      key={`pending-${classroom.id}`}
-                      className="bg-brand-light p-7 rounded-4xl border-2 border-black border-dashed opacity-80 flex flex-col justify-between relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 right-0 bg-[#FFF9C4] border-b-2 border-l-2 border-black px-4 py-1 rounded-bl-2xl font-bold text-xs uppercase tracking-wider">
-                        Pending Approval
-                      </div>
-                      <div>
-                        <div className="w-11 h-11 flex items-center justify-center bg-gray-200 rounded-full border border-black mb-5">
-                          <BookOpen className="h-5 w-5 text-gray-500" />
-                        </div>
-                        <h3 className="text-xl font-extrabold text-gray-700 mb-1">{classroom.name}</h3>
-                        <p className="text-gray-500 text-sm font-medium mb-4">Teacher: {classroom.teacherName || 'Faculty'}</p>
-                        <div className="bg-gray-100 border border-gray-300 rounded-xl p-4 text-sm font-medium text-gray-600">
-                          <span className="block font-bold mb-1 text-black">Waiting for Access</span>
-                          Please contact {classroom.teacherName || 'your teacher'} to approve your request.
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {classrooms.length === 0 && pendingClassrooms.length === 0 && !showJoin && (
-                    <div className="col-span-full py-16 bg-white rounded-4xl border-2 border-black border-dashed flex flex-col items-center justify-center text-center px-4">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center border border-black mb-4">
-                        <BookOpen className="h-8 w-8 text-black" />
-                      </div>
-                      <p className="text-xl font-bold text-black mb-2">Not enrolled yet</p>
-                      <p className="text-gray-500 font-medium">Click "Join Classroom" to enter your first class.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right column — Activity + Notifications */}
-              <div className="lg:col-span-1 space-y-6 sticky top-24 self-start">
+              {/* Activity + Notifications */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
                 <ActivityTimeline />
-
-                <div className="bg-white rounded-4xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                  <div className="p-6 border-b-2 border-black flex items-center bg-brand-light">
-                    <Bell className="h-5 w-5 mr-3 text-black" />
-                    <h3 className="text-base font-extrabold text-black">Recent Updates</h3>
+                <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                  <div className="px-5 sm:px-6 py-4 border-b-2 border-black flex items-center gap-2.5 bg-[#FAFAFA]">
+                    <div className="w-7 h-7 bg-black border-2 border-black rounded-lg flex items-center justify-center shrink-0">
+                      <Bell className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <h3 className="text-sm font-extrabold">Recent Updates</h3>
                   </div>
-                  <div className="max-h-100 overflow-y-auto p-2">
+                  <div className="max-h-72 sm:max-h-80 overflow-y-auto">
                     <NotificationsPanel classroomIds={classrooms.map(c => c.id)} />
                   </div>
                 </div>
@@ -381,8 +398,126 @@ export default function StudentDashboard() {
 
             </div>
           </div>
-        )}
-      </main>
+        </div>
+
+      ) : (
+
+        /* ── Full-width tabs ─────────────────────────────────────── */
+        <main className="flex-1 max-w-7xl mx-auto w-full py-6 sm:py-10 px-4 sm:px-6 lg:px-8 pb-24 lg:pb-10">
+
+          {activeTab === 'profile' ? (
+            <Profile />
+
+          ) : activeTab === 'agents' ? (
+            <PersonalAgentPanel />
+
+          ) : activeTab === 'leaderboard' ? (
+            <div className="max-w-3xl mx-auto">
+              <Leaderboard
+                classrooms={classrooms.map(c => ({ id: c.id, name: c.name, subject: c.subject, students: c.students ?? [] }))}
+                currentUserId={user?.uid ?? ''}
+              />
+            </div>
+
+          ) : activeTab === 'meetings' ? (
+            <div className="space-y-6 sm:space-y-8">
+              {/* Header */}
+              <div className="flex items-center gap-3 sm:gap-4 pb-4 border-b-2 border-black">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#FF6B57] border-2 border-black rounded-xl sm:rounded-2xl flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] shrink-0">
+                  <Video className="h-4 w-4 sm:h-5 sm:w-5 text-black" />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Live Classes</h1>
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Join active sessions from your classrooms</p>
+                </div>
+                {liveCount > 0 && (
+                  <span className="ml-auto px-3 sm:px-4 py-1.5 bg-[#FF6B57] border-2 border-black rounded-full text-xs sm:text-sm font-extrabold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] animate-pulse shrink-0">
+                    {liveCount} Live
+                  </span>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {liveCount > 0 ? (
+                  classrooms.filter(c => c.meetingActive).map(classroom => (
+                    <div key={classroom.id} className="bg-white rounded-[1.75rem] sm:rounded-[2rem] border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col hover:-translate-y-1 transition-all relative">
+                      <div className="h-1.5 bg-[#FF6B57]" />
+                      <div className="absolute top-4 right-4">
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FF6B57] text-black border-2 border-black rounded-full text-xs font-extrabold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                          <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" />
+                          Live
+                        </span>
+                      </div>
+                      <div className="p-6 sm:p-7 flex flex-col flex-1">
+                        <div className="w-11 h-11 bg-[#FAFAFA] border-2 border-black rounded-xl flex items-center justify-center mb-4">
+                          <BookOpen className="h-5 w-5" />
+                        </div>
+                        <h3 className="text-lg sm:text-xl font-extrabold mb-1">{classroom.name}</h3>
+                        <p className="text-xs font-extrabold text-gray-500 uppercase tracking-widest">{classroom.subject}</p>
+                        <p className="text-sm text-gray-500 font-medium mt-2 mb-5">Your teacher has started a live session.</p>
+                        <a
+                          href={classroom.meetingLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-auto flex items-center justify-center gap-2 px-5 py-3 sm:py-3.5 bg-black text-white font-extrabold rounded-full border-2 border-black hover:bg-gray-800 transition-colors shadow-[3px_3px_0px_0px_rgba(255,107,87,1)]"
+                        >
+                          <Video className="h-4 w-4" />
+                          Join Meeting
+                        </a>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full py-20 sm:py-24 bg-white rounded-[2rem] border-2 border-dashed border-black flex flex-col items-center justify-center text-center px-6 sm:px-8">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#FAFAFA] border-2 border-black rounded-full flex items-center justify-center mb-5">
+                      <Video className="h-7 w-7 sm:h-8 sm:w-8 text-gray-300" />
+                    </div>
+                    <p className="text-xl sm:text-2xl font-extrabold mb-2">No Live Sessions Right Now</p>
+                    <p className="text-gray-500 font-medium max-w-xs text-sm">When your teacher starts a live class, it will appear here instantly.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+        </main>
+      )}
+
+      {/* ── Mobile bottom navigation bar ───────────────────────── */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-black z-20 lg:hidden">
+        <div className="flex items-stretch justify-around">
+          {bottomNavTabs.map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              onClick={() => switchTab(id)}
+              className={`flex flex-col items-center justify-center gap-1 flex-1 py-2.5 transition-colors relative ${
+                activeTab === id ? 'text-black' : 'text-gray-400'
+              }`}
+            >
+              {/* Active top indicator */}
+              {activeTab === id && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-[#FF6B57] rounded-full" />
+              )}
+              <div className="relative">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                  activeTab === id ? 'bg-black text-white' : 'text-gray-400'
+                }`}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                {/* Live badge on the meetings icon */}
+                {id === 'meetings' && liveCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#FF6B57] rounded-full border-2 border-white animate-pulse" />
+                )}
+              </div>
+              <span className={`text-[9px] font-extrabold uppercase tracking-wide leading-none ${
+                activeTab === id ? 'text-black' : 'text-gray-400'
+              }`}>
+                {label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
     </div>
   );
 }

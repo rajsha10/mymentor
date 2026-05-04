@@ -7,13 +7,25 @@ import { Link } from 'react-router-dom';
 import CreateClassroom from '../components/CreateClassroom';
 import NotificationsPanel from '../../shared/components/NotificationsPanel';
 import Profile from '../../shared/pages/Profile';
-import { Bell, BookOpen, User, LayoutDashboard, LogOut, Video } from 'lucide-react';
+import { 
+  Bell, 
+  BookOpen, 
+  User, 
+  LayoutDashboard, 
+  LogOut, 
+  Video, 
+  Home, 
+  Plus, 
+  Users,
+  Calendar,
+  Sparkles
+} from 'lucide-react';
 
 export default function TeacherDashboard() {
   const { user, userData } = useAuth();
   const [classrooms, setClassrooms] = useState<any[]>([]);
   const [showCreate, setShowCreate] = useState(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<'overview' | 'classrooms' | 'profile'>('overview');
 
   useEffect(() => {
     if (!user) return;
@@ -50,136 +62,251 @@ export default function TeacherDashboard() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col font-sans text-black">
-      <nav className="bg-[#FAFAFA] border-b-2 border-black sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-20">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center">
-                <img src="/logo.png" alt="MyMentor Logo" className="h-48 w-auto object-contain" />
-              </div>
-              <div className="hidden md:flex space-x-4">
-                <button 
-                  onClick={() => setActiveTab('home')}
-                  className={`px-5 py-2.5 text-sm font-bold rounded-full flex items-center border border-black transition-colors ${activeTab === 'home' ? 'bg-black text-white' : 'bg-transparent text-black hover:bg-gray-100'}`}
-                >
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
-                  Dashboard
-                </button>
-                <button 
-                  onClick={() => setActiveTab('profile')}
-                  className={`px-5 py-2.5 text-sm font-bold rounded-full flex items-center border border-black transition-colors ${activeTab === 'profile' ? 'bg-black text-white' : 'bg-transparent text-black hover:bg-gray-100'}`}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  My Profile
-                </button>
-              </div>
+  const totalStudents = classrooms.reduce((acc, curr) => acc + (curr.students?.length || 0), 0);
+  const totalPending = classrooms.reduce((acc, curr) => acc + (curr.pendingRequests?.length || 0), 0);
+
+  const renderOverview = () => (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-[#FF6B57] p-8 rounded-[2rem] border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+        <div className="relative z-10">
+          <h2 className="text-4xl font-black text-black mb-2">Welcome back, {userData?.name}! 👋</h2>
+          <p className="text-black/80 font-bold text-lg">Ready to inspire your students today? You have {classrooms.length} active classrooms.</p>
+        </div>
+        <Sparkles className="absolute right-8 top-8 h-24 w-24 text-black/10 -rotate-12" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl border border-black flex items-center justify-center">
+              <BookOpen className="h-6 w-6 text-blue-600" />
             </div>
-            <div className="flex items-center space-x-6">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-black">{userData?.name}</p>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{userData?.subject}</p>
-              </div>
-              <button 
-                onClick={handleLogout} 
-                className="w-10 h-10 rounded-full border border-black flex items-center justify-center hover:bg-[#FF6B57] hover:text-white transition-colors"
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+            <span className="text-xs font-black uppercase tracking-wider text-gray-400">Total Classes</span>
+          </div>
+          <p className="text-3xl font-black text-black">{classrooms.length}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-green-100 rounded-xl border border-black flex items-center justify-center">
+              <Users className="h-6 w-6 text-green-600" />
             </div>
+            <span className="text-xs font-black uppercase tracking-wider text-gray-400">Total Students</span>
+          </div>
+          <p className="text-3xl font-black text-black">{totalStudents}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-12 h-12 bg-yellow-100 rounded-xl border border-black flex items-center justify-center">
+              <Bell className="h-6 w-6 text-yellow-600" />
+            </div>
+            <span className="text-xs font-black uppercase tracking-wider text-gray-400">Pending Requests</span>
+          </div>
+          <p className="text-3xl font-black text-black">{totalPending}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="p-6 border-b-2 border-black flex items-center justify-between bg-[#FAFAFA]">
+            <div className="flex items-center">
+              <Calendar className="h-6 w-6 mr-3 text-black" />
+              <h3 className="text-lg font-extrabold text-black">System Activity</h3>
+            </div>
+          </div>
+          <div className="max-h-[400px] overflow-y-auto p-4">
+            <NotificationsPanel classroomIds={classrooms.map(c => c.id)} />
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 w-full">
-        {activeTab === 'profile' ? (
-          <Profile />
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div className="lg:col-span-2 space-y-8">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8">
-                <h2 className="text-6xl tracking-tight font-extrabold text-black">Classrooms</h2>
-                <button
-                  onClick={() => setShowCreate(!showCreate)}
-                  className="inline-flex items-center px-6 py-3 bg-[#FF6B57] text-black text-sm font-bold rounded-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] transition-all"
-                >
-                  {showCreate ? 'Cancel' : 'Create Classroom'}
-                </button>
-              </div>
+        <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col items-center justify-center text-center space-y-6">
+          <div className="w-20 h-20 bg-gray-100 rounded-full border-2 border-black flex items-center justify-center">
+            <Plus className="h-10 w-10 text-black" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-black text-black mb-2">Start a New Class</h3>
+            <p className="text-gray-500 font-medium">Create a new virtual learning space for your students.</p>
+          </div>
+          <button
+            onClick={() => {
+              setActiveTab('classrooms');
+              setShowCreate(true);
+            }}
+            className="px-8 py-3 bg-[#FF6B57] text-black font-black rounded-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+          >
+            Create Classroom
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
-              {showCreate && (
-                <div className="p-8 bg-white border-2 border-black rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8">
-                  <CreateClassroom onCreated={() => setShowCreate(false)} />
-                </div>
-              )}
+  const renderClassrooms = () => (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h2 className="text-4xl font-black text-black">Your Classrooms</h2>
+        <button
+          onClick={() => setShowCreate(!showCreate)}
+          className={`inline-flex items-center px-6 py-3 ${showCreate ? 'bg-white' : 'bg-[#FF6B57]'} text-black text-sm font-black rounded-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] transition-all`}
+        >
+          {showCreate ? 'Cancel' : <><Plus className="h-4 w-4 mr-2" /> Create Classroom</>}
+        </button>
+      </div>
 
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-                {classrooms.map((classroom) => (
-                  <Link
-                    key={classroom.id}
-                    to={`/classroom/${classroom.id}`}
-                    className="group bg-white p-8 rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex justify-between items-start mb-6">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-full border border-black group-hover:bg-[#FF6B57] group-hover:text-black transition-colors">
-                            <BookOpen className="h-5 w-5" />
-                          </div>
-                          {classroom.meetingActive && (
-                            <div className="flex items-center px-3 py-1.5 bg-[#FF6B57] text-black border border-black rounded-full text-[10px] font-bold uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                              <Video className="h-3 w-3 mr-1" />
-                              Live
-                            </div>
-                          )}
-                        </div>
-                        <span className="px-3 py-1 rounded-full border border-gray-300 text-xs font-bold font-mono text-gray-500">
-                          {classroom.classroomId}
-                        </span>
-                      </div>
-                      <h3 className="text-2xl font-extrabold text-black mb-1">{classroom.name}</h3>
-                      <p className="text-gray-500 font-medium">{classroom.subject}</p>
-                    </div>
-                    
-                    <div className="mt-8 pt-6 border-t-2 border-gray-100 flex items-center justify-between">
-                      <span className="text-sm font-bold text-gray-600">{classroom.students?.length || 0} Students</span>
-                      {classroom.pendingRequests?.length > 0 && (
-                        <span className="bg-black text-white px-3 py-1 rounded-full text-xs font-bold border border-black">
-                          {classroom.pendingRequests.length} Pending
-                        </span>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-                
-                {classrooms.length === 0 && !showCreate && (
-                  <div className="col-span-full py-16 bg-white rounded-[2rem] border-2 border-black border-dashed flex flex-col items-center justify-center text-center px-4">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center border border-black mb-4">
-                      <BookOpen className="h-8 w-8 text-black" />
-                    </div>
-                    <p className="text-xl font-bold text-black mb-2">No classrooms yet</p>
-                    <p className="text-gray-500 font-medium">Create your first virtual space to start teaching.</p>
+      {showCreate && (
+        <div className="p-8 bg-white border-2 border-black rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] mb-8">
+          <CreateClassroom onCreated={() => setShowCreate(false)} />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {classrooms.map((classroom) => (
+          <Link
+            key={classroom.id}
+            to={`/classroom/${classroom.id}`}
+            className="group bg-white p-8 rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-xl border border-black group-hover:bg-[#FF6B57] group-hover:text-black transition-colors">
+                    <BookOpen className="h-5 w-5" />
                   </div>
-                )}
-              </div>
-            </div>
-
-            <div className="lg:col-span-1 space-y-8">
-              <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                <div className="p-6 border-b-2 border-black flex items-center bg-[#FAFAFA]">
-                  <Bell className="h-6 w-6 mr-3 text-black" />
-                  <h3 className="text-lg font-extrabold text-black">System Activity</h3>
+                  {classroom.meetingActive && (
+                    <div className="flex items-center px-3 py-1 bg-[#FF6B57] text-black border border-black rounded-full text-[10px] font-black uppercase animate-pulse">
+                      <Video className="h-3 w-3 mr-1" />
+                      Live
+                    </div>
+                  )}
                 </div>
-                <div className="max-h-[500px] overflow-y-auto p-2">
-                  <NotificationsPanel classroomIds={classrooms.map(c => c.id)} />
-                </div>
+                <span className="px-3 py-1 rounded-full border border-gray-200 text-[10px] font-black font-mono text-gray-400 uppercase tracking-widest">
+                  {classroom.classroomId}
+                </span>
               </div>
+              <h3 className="text-2xl font-black text-black mb-1 group-hover:text-[#FF6B57] transition-colors">{classroom.name}</h3>
+              <p className="text-gray-500 font-bold">{classroom.subject}</p>
             </div>
+            
+            <div className="mt-8 pt-6 border-t-2 border-gray-50 flex items-center justify-between">
+              <div className="flex items-center text-sm font-bold text-gray-600">
+                <Users className="h-4 w-4 mr-2" />
+                {classroom.students?.length || 0} Students
+              </div>
+              {classroom.pendingRequests?.length > 0 && (
+                <span className="bg-black text-white px-3 py-1 rounded-full text-[10px] font-black border border-black">
+                  {classroom.pendingRequests.length} PENDING
+                </span>
+              )}
+            </div>
+          </Link>
+        ))}
+        
+        {classrooms.length === 0 && !showCreate && (
+          <div className="col-span-full py-20 bg-white rounded-[2rem] border-2 border-black border-dashed flex flex-col items-center justify-center text-center px-4">
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center border border-black mb-6">
+              <BookOpen className="h-10 w-10 text-black/20" />
+            </div>
+            <p className="text-2xl font-black text-black mb-2">No classrooms yet</p>
+            <p className="text-gray-500 font-bold max-w-xs">Start your teaching journey by creating your first virtual classroom.</p>
           </div>
         )}
-      </main>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] flex font-sans text-black selection:bg-[#FF6B57] selection:text-black">
+      {/* Sidebar */}
+      <aside className="w-72 bg-white border-r-2 border-black hidden lg:flex flex-col sticky top-0 h-screen z-30">
+        <div className="p-8 border-b-2 border-black">
+          <img src="/logo.png" alt="MyMentor Logo" className="h-32 w-auto object-contain" />
+        </div>
+        
+        <nav className="flex-1 p-6 space-y-4">
+          <button 
+            onClick={() => setActiveTab('overview')}
+            className={`w-full flex items-center px-6 py-4 rounded-2xl border-2 transition-all font-black text-sm ${activeTab === 'overview' ? 'bg-black text-white border-black shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]' : 'bg-transparent text-black border-transparent hover:bg-gray-50'}`}
+          >
+            <Home className="h-5 w-5 mr-3" />
+            Overview
+          </button>
+          <button 
+            onClick={() => setActiveTab('classrooms')}
+            className={`w-full flex items-center px-6 py-4 rounded-2xl border-2 transition-all font-black text-sm ${activeTab === 'classrooms' ? 'bg-black text-white border-black shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]' : 'bg-transparent text-black border-transparent hover:bg-gray-50'}`}
+          >
+            <LayoutDashboard className="h-5 w-5 mr-3" />
+            Classrooms
+          </button>
+          <button 
+            onClick={() => setActiveTab('profile')}
+            className={`w-full flex items-center px-6 py-4 rounded-2xl border-2 transition-all font-black text-sm ${activeTab === 'profile' ? 'bg-black text-white border-black shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]' : 'bg-transparent text-black border-transparent hover:bg-gray-50'}`}
+          >
+            <User className="h-5 w-5 mr-3" />
+            My Profile
+          </button>
+        </nav>
+
+        <div className="p-6 border-t-2 border-black bg-gray-50">
+          <div className="flex items-center space-x-3 mb-6 px-2">
+            <div className="w-10 h-10 rounded-full border border-black bg-[#FF6B57] flex items-center justify-center font-black">
+              {userData?.name?.charAt(0)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-black text-black truncate">{userData?.name}</p>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{userData?.subject}</p>
+            </div>
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center px-4 py-3 bg-white border-2 border-black rounded-xl font-black text-sm hover:bg-red-50 transition-colors"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile Nav */}
+        <header className="lg:hidden bg-white border-b-2 border-black px-6 py-4 flex justify-between items-center sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="MyMentor Logo" className="h-12 w-auto object-contain" />
+            <h1 className="text-xl font-black tracking-tight">Teacher</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setActiveTab('overview')}
+              className={`p-2.5 rounded-xl border-2 transition-all ${activeTab === 'overview' ? 'bg-black text-white border-black shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]' : 'bg-white text-black border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'}`}
+            >
+              <Home className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={() => setActiveTab('classrooms')}
+              className={`p-2.5 rounded-xl border-2 transition-all ${activeTab === 'classrooms' ? 'bg-black text-white border-black shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]' : 'bg-white text-black border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'}`}
+            >
+              <LayoutDashboard className="h-5 w-5" />
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="p-2.5 rounded-xl border-2 border-black bg-white text-black hover:bg-red-50 hover:text-red-600 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <main className="flex-1 overflow-y-auto relative bg-[#FAFAFA]" style={{ 
+          backgroundImage: 'radial-gradient(#e5e7eb 1.5px, transparent 1.5px)', 
+          backgroundSize: '32px 32px' 
+        }}>
+          <div className="max-w-6xl mx-auto py-12 px-6 lg:px-12">
+            {activeTab === 'overview' && renderOverview()}
+            {activeTab === 'classrooms' && renderClassrooms()}
+            {activeTab === 'profile' && <div className="animate-in fade-in slide-in-from-bottom-4 duration-500"><Profile /></div>}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -49,16 +49,16 @@ interface Message {
 type PanelTab = 'my-agents' | 'discover';
 
 const confidenceColor: Record<string, string> = {
-  High:   'text-green-600 bg-green-50 border-green-200',
-  Medium: 'text-yellow-600 bg-yellow-50 border-yellow-200',
-  Low:    'text-red-600 bg-red-50 border-red-200',
+  High:   'text-green-700 bg-green-50 border-green-300',
+  Medium: 'text-yellow-700 bg-yellow-50 border-yellow-300',
+  Low:    'text-red-700 bg-red-50 border-red-300',
 };
 
 function personalClassroomId(uid: string) {
   return `personal_${uid}`;
 }
 
-// ── Chat view (reused for both owned and discovered agents) ────────────────
+// ── Agent Chat View ────────────────────────────────────────────────────────
 
 function AgentChatView({
   agent,
@@ -79,7 +79,7 @@ function AgentChatView({
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const agentId = 'agent_id' in agent ? agent.agent_id : agent.agent_id;
+  const agentId = agent.agent_id;
 
   useEffect(() => {
     setHistoryLoading(true);
@@ -161,16 +161,10 @@ function AgentChatView({
       setLearnedTopics((prev) => new Set(prev).add(topic));
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'agent',
-          text: `Topic added to your notes! You can now ask about **${topic}** and I'll have context for it.`,
-        },
+        { role: 'agent', text: `Topic added to your notes! You can now ask about **${topic}** and I'll have context for it.` },
       ]);
     } catch (err: any) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'agent', text: `Failed to add topic: ${err.message}` },
-      ]);
+      setMessages((prev) => [...prev, { role: 'agent', text: `Failed to add topic: ${err.message}` }]);
     } finally {
       setLearningTopic(null);
     }
@@ -188,10 +182,11 @@ function AgentChatView({
   };
 
   return (
-    <div className="flex h-[600px] overflow-hidden">
+    <div className="flex h-[720px] overflow-hidden">
       {/* Left: chat */}
       <div className="flex flex-col flex-1 min-w-0 border-r-2 border-black">
-        {/* Header */}
+
+        {/* Chat header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b-2 border-black bg-white shrink-0">
           <button
             onClick={onBack}
@@ -199,7 +194,7 @@ function AgentChatView({
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <div className="p-2 bg-[#FF6B57]/10 rounded-xl border-2 border-black">
+          <div className="p-2 bg-[#FF6B57]/15 rounded-xl border-2 border-black">
             <Bot className="h-4 w-4 text-black" />
           </div>
           <div className="flex-1 min-w-0">
@@ -214,34 +209,36 @@ function AgentChatView({
           )}
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-[#FAFAFA]">
+        {/* Messages area */}
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4 bg-[#FAFAFA]">
           {historyLoading && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 space-y-2">
-              <Loader className="h-6 w-6 animate-spin" />
-              <p className="text-xs font-bold">Loading conversation history…</p>
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
+              <Loader className="h-6 w-6 animate-spin text-gray-400" />
+              <p className="text-xs font-bold text-gray-400">Loading conversation history…</p>
             </div>
           )}
 
           {!historyLoading && messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 space-y-3">
-              <div className="w-16 h-16 bg-white rounded-full border-2 border-black flex items-center justify-center">
-                <Sparkles className="h-8 w-8 text-[#FF6B57]" />
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+              <div className="w-16 h-16 bg-white border-2 border-black rounded-full flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                <Sparkles className="h-7 w-7 text-[#FF6B57]" />
               </div>
-              <p className="text-sm font-extrabold text-black">Ask this agent a question</p>
-              <p className="text-xs font-medium text-gray-500">Answers come from the documents uploaded to this agent.</p>
+              <div>
+                <p className="text-sm font-extrabold text-black mb-1">Ask this agent a question</p>
+                <p className="text-xs font-medium text-gray-500 max-w-xs">Answers come from the documents uploaded to this agent.</p>
+              </div>
             </div>
           )}
 
           {!historyLoading && messages.map((msg, i) => (
             <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {msg.role === 'agent' && (
-                <div className="p-1.5 bg-[#FF6B57]/10 rounded-full h-7 w-7 flex items-center justify-center shrink-0 mt-0.5 border-2 border-black">
+                <div className="p-1.5 bg-[#FF6B57]/15 rounded-full h-7 w-7 flex items-center justify-center shrink-0 mt-0.5 border-2 border-black">
                   <Bot className="h-3.5 w-3.5 text-black" />
                 </div>
               )}
 
-              <div className="max-w-[75%] space-y-1">
+              <div className="max-w-[75%] space-y-1.5">
                 <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
                   ${msg.role === 'user'
                     ? 'bg-black text-white rounded-br-sm'
@@ -271,7 +268,7 @@ function AgentChatView({
                 </div>
 
                 {msg.role === 'agent' && msg.out_of_scope && msg.pendingQuestion && (
-                  <div className="flex flex-wrap gap-2 pt-1 pl-1">
+                  <div className="flex flex-wrap gap-2 pt-0.5 pl-1">
                     <button
                       onClick={() => handleAnswerGeneral(msg.pendingQuestion!)}
                       disabled={loading}
@@ -291,11 +288,9 @@ function AgentChatView({
                         disabled={loading || learningTopic === msg.pendingQuestion}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-black text-white text-xs font-bold border-2 border-black rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-800 disabled:opacity-40 transition-colors"
                       >
-                        {learningTopic === msg.pendingQuestion ? (
-                          <Loader className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Search className="h-3 w-3" />
-                        )}
+                        {learningTopic === msg.pendingQuestion
+                          ? <Loader className="h-3 w-3 animate-spin" />
+                          : <Search className="h-3 w-3" />}
                         {learningTopic === msg.pendingQuestion ? 'Learning…' : 'Search & Add Topic'}
                       </button>
                     )}
@@ -303,18 +298,20 @@ function AgentChatView({
                 )}
 
                 {msg.role === 'agent' && msg.general_knowledge && (
-                  <div className="flex items-center justify-between pl-1 pt-1">
+                  <div className="flex items-center justify-between pl-1 pt-0.5">
                     <p className="text-xs font-bold text-blue-500">⚠ General knowledge — may not match documents</p>
                     <button
                       onClick={() => handleSaveToContext(i)}
                       disabled={msg.savedToContext}
-                      className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full border-2 border-black transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
+                      className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-full border-2 border-black transition-colors shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${
                         msg.savedToContext
                           ? 'bg-green-100 text-green-700 cursor-default'
                           : 'bg-white text-black hover:bg-[#FF6B57]'
                       }`}
                     >
-                      {msg.savedToContext ? <><Check className="h-3 w-3" /> Saved</> : <><BookmarkPlus className="h-3 w-3" /> Save to Notes</>}
+                      {msg.savedToContext
+                        ? <><Check className="h-3 w-3" /> Saved</>
+                        : <><BookmarkPlus className="h-3 w-3" /> Save to Notes</>}
                     </button>
                   </div>
                 )}
@@ -339,14 +336,14 @@ function AgentChatView({
 
           {loading && (
             <div className="flex gap-2.5 justify-start">
-              <div className="p-1.5 bg-[#FF6B57]/10 rounded-full h-7 w-7 flex items-center justify-center shrink-0 border-2 border-black">
+              <div className="p-1.5 bg-[#FF6B57]/15 rounded-full h-7 w-7 flex items-center justify-center shrink-0 border-2 border-black">
                 <Bot className="h-3.5 w-3.5 text-black" />
               </div>
               <div className="bg-white border-2 border-black rounded-2xl rounded-bl-sm px-4 py-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                 <div className="flex gap-1 items-center">
-                  <span className="h-1.5 w-1.5 bg-[#FF6B57] rounded-full animate-bounce [animation-delay:0ms]" />
-                  <span className="h-1.5 w-1.5 bg-[#FF6B57] rounded-full animate-bounce [animation-delay:150ms]" />
-                  <span className="h-1.5 w-1.5 bg-[#FF6B57] rounded-full animate-bounce [animation-delay:300ms]" />
+                  <span className="h-2 w-2 bg-[#FF6B57] rounded-full animate-bounce [animation-delay:0ms]" />
+                  <span className="h-2 w-2 bg-[#FF6B57] rounded-full animate-bounce [animation-delay:150ms]" />
+                  <span className="h-2 w-2 bg-[#FF6B57] rounded-full animate-bounce [animation-delay:300ms]" />
                 </div>
               </div>
             </div>
@@ -355,9 +352,9 @@ function AgentChatView({
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
+        {/* Input bar */}
         <div className="px-4 py-3 border-t-2 border-black bg-white shrink-0">
-          <div className="flex items-end gap-2 bg-[#FAFAFA] border-2 border-black rounded-[1rem] px-3 py-2 focus-within:border-[#FF6B57] transition-colors">
+          <div className="flex items-end gap-2 bg-[#FAFAFA] border-2 border-black rounded-[1rem] px-4 py-2.5 focus-within:border-[#FF6B57] transition-colors">
             <textarea
               ref={inputRef}
               rows={1}
@@ -370,47 +367,47 @@ function AgentChatView({
             <button
               onClick={handleSend}
               disabled={!input.trim() || loading}
-              className="p-2 bg-black text-white rounded-full border-2 border-black hover:bg-[#FF6B57] hover:border-black disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+              className="p-2.5 bg-black text-white rounded-full border-2 border-black hover:bg-[#FF6B57] hover:border-black disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
             >
               {loading ? <Loader className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>
           </div>
-          <p className="text-xs font-medium text-gray-400 mt-1.5 pl-1">Shift+Enter for new line</p>
+          <p className="text-[10px] font-medium text-gray-400 mt-1.5 pl-1">Shift+Enter for new line</p>
         </div>
       </div>
 
-      {/* Right: details panel */}
+      {/* Right: source & confidence panel */}
       <div className="w-64 shrink-0 flex flex-col bg-white overflow-y-auto">
-        <div className="px-4 py-3 border-b-2 border-black shrink-0 bg-[#FAFAFA]">
-          <p className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Response Details</p>
+        <div className="px-5 py-4 border-b-2 border-black shrink-0 bg-[#FAFAFA]">
+          <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">Response Details</p>
         </div>
         {!selected ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center px-4 text-gray-400 space-y-2">
-            <BookOpen className="h-8 w-8 text-gray-200" />
-            <p className="text-xs font-medium">Click "View sources & confidence" on any agent reply to see details here.</p>
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-5 text-gray-400 space-y-3">
+            <BookOpen className="h-9 w-9 text-gray-200" />
+            <p className="text-xs font-medium leading-relaxed">Click "View sources & confidence" on any agent reply to see details here.</p>
           </div>
         ) : (
-          <div className="p-4 space-y-5">
+          <div className="p-5 space-y-5">
             {selected.confidence && (
               <div>
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="flex items-center gap-1.5 mb-2.5">
                   <BarChart2 className="h-3.5 w-3.5 text-gray-400" />
-                  <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Confidence</span>
+                  <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">Confidence</span>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${confidenceColor[selected.confidence] ?? 'text-gray-600 bg-gray-50 border-gray-200'}`}>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold border-2 ${confidenceColor[selected.confidence] ?? 'text-gray-600 bg-gray-50 border-gray-200'}`}>
                   {selected.confidence}
                 </span>
               </div>
             )}
             {selected.sources && selected.sources.length > 0 && (
               <div>
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="flex items-center gap-1.5 mb-2.5">
                   <FileText className="h-3.5 w-3.5 text-gray-400" />
-                  <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Sources ({selected.sources.length})</span>
+                  <span className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest">Sources ({selected.sources.length})</span>
                 </div>
                 <ul className="space-y-2">
                   {selected.sources.map((s, i) => (
-                    <li key={i} className="bg-[#FAFAFA] border-2 border-black rounded-[0.75rem] px-3 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    <li key={i} className="bg-[#FAFAFA] border-2 border-black rounded-[0.75rem] px-3 py-2.5 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                       <p className="text-xs font-bold text-black truncate" title={s.file}>{s.file}</p>
                       <p className="text-xs font-medium text-gray-500 mt-0.5">Page {s.page}</p>
                     </li>
@@ -428,7 +425,7 @@ function AgentChatView({
   );
 }
 
-// ── Docs view ──────────────────────────────────────────────────────────────
+// ── Agent Docs View ────────────────────────────────────────────────────────
 
 function AgentDocsView({ agent, onBack, onChat }: { agent: Agent; onBack: () => void; onChat: () => void }) {
   const [docs, setDocs] = useState<Doc[]>([]);
@@ -484,25 +481,43 @@ function AgentDocsView({ agent, onBack, onChat }: { agent: Agent; onBack: () => 
   };
 
   return (
-    <div className="p-6 sm:p-8 space-y-6">
-      <div className="flex items-center gap-4">
-        <button onClick={onBack} className="px-4 py-2 border-2 border-black rounded-full font-bold text-sm hover:bg-black hover:text-white transition-colors">
-          &larr; Back
-        </button>
-        <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-extrabold text-black truncate">{agent.name}</h2>
-          <p className="text-sm font-medium text-gray-500 mt-0.5 truncate">{agent.description}</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <div className="h-1.5 bg-[#FF6B57]" />
+        <div className="p-7 flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="p-2.5 border-2 border-black rounded-full font-bold text-sm hover:bg-black hover:text-white transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <div className="p-3 bg-[#FF6B57]/15 rounded-xl border-2 border-black">
+            <Bot className="h-5 w-5 text-black" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl font-extrabold text-black truncate">{agent.name}</h2>
+            <p className="text-sm font-medium text-gray-500 mt-0.5 truncate">{agent.description}</p>
+          </div>
+          <button
+            onClick={onChat}
+            className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full border-2 border-black font-extrabold text-sm hover:bg-gray-800 transition-colors shadow-[4px_4px_0px_0px_rgba(255,107,87,1)] shrink-0"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Chat
+          </button>
         </div>
-        <button onClick={onChat} className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-full border-2 border-black font-bold text-sm hover:bg-gray-800 transition-colors shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]">
-          <MessageSquare className="h-4 w-4" />
-          Chat
-        </button>
       </div>
 
+      {/* Upload card */}
       <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-extrabold text-black">Knowledge Documents</h3>
-          <button onClick={fetchDocs} disabled={docsLoading} className="flex items-center gap-2 px-4 py-2 border-2 border-black rounded-full text-sm font-bold hover:bg-black hover:text-white transition-colors disabled:opacity-50">
+          <button
+            onClick={fetchDocs}
+            disabled={docsLoading}
+            className="flex items-center gap-2 px-4 py-2 border-2 border-black rounded-full text-sm font-bold hover:bg-black hover:text-white transition-colors disabled:opacity-50"
+          >
             <RefreshCw className={`h-4 w-4 ${docsLoading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
@@ -513,12 +528,16 @@ function AgentDocsView({ agent, onBack, onChat }: { agent: Agent; onBack: () => 
           onDragLeave={() => setDragOver(false)}
           onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) handleUpload(f); }}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed border-black rounded-[1.5rem] p-10 flex flex-col items-center justify-center cursor-pointer transition-all
+          className={`border-2 border-dashed border-black rounded-[1.5rem] p-12 flex flex-col items-center justify-center cursor-pointer transition-all
             ${dragOver ? 'bg-[#FF6B57]/10 border-[#FF6B57] shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]' : 'bg-[#FAFAFA] hover:bg-[#FF6B57]/5 hover:border-[#FF6B57]'}`}
         >
           <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f); }} />
-          {uploadLoading ? <Loader className="h-10 w-10 text-black animate-spin mb-3" /> : <UploadCloud className="h-10 w-10 text-black mb-3" />}
-          <p className="text-base font-extrabold text-black">{uploadLoading ? 'Uploading…' : 'Drop a PDF here or click to browse'}</p>
+          {uploadLoading
+            ? <Loader className="h-10 w-10 text-black animate-spin mb-4" />
+            : <UploadCloud className="h-10 w-10 text-black mb-4" />}
+          <p className="text-base font-extrabold text-black">
+            {uploadLoading ? 'Uploading…' : 'Drop a PDF here or click to browse'}
+          </p>
           <p className="text-sm font-medium text-gray-500 mt-1">PDF only · max 10 MB</p>
         </div>
 
@@ -549,8 +568,8 @@ function AgentDocsView({ agent, onBack, onChat }: { agent: Agent; onBack: () => 
           <span className="font-bold">Loading documents…</span>
         </div>
       ) : docs.length === 0 ? (
-        <div className="text-center py-16 bg-[#FAFAFA] rounded-[2rem] border-2 border-black border-dashed">
-          <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+        <div className="text-center py-16 bg-[#FAFAFA] rounded-[2rem] border-2 border-dashed border-black">
+          <FileText className="h-12 w-12 text-gray-200 mx-auto mb-3" />
           <p className="text-xl font-extrabold text-black">No documents yet</p>
           <p className="text-gray-500 font-medium mt-1">Upload a PDF to give this agent knowledge.</p>
         </div>
@@ -559,7 +578,7 @@ function AgentDocsView({ agent, onBack, onChat }: { agent: Agent; onBack: () => 
           {docs.map((d) => (
             <div key={d.doc_id} className="bg-white rounded-[1.5rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-6 py-5 flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
-                <div className="p-3 bg-[#FF6B57]/10 rounded-xl border-2 border-black shrink-0">
+                <div className="p-3 bg-[#FF6B57]/15 rounded-xl border-2 border-black shrink-0">
                   <FileText className="h-5 w-5 text-black" />
                 </div>
                 <div className="min-w-0">
@@ -582,7 +601,7 @@ function AgentDocsView({ agent, onBack, onChat }: { agent: Agent; onBack: () => 
   );
 }
 
-// ── Discover tab ───────────────────────────────────────────────────────────
+// ── Discover Tab ───────────────────────────────────────────────────────────
 
 function DiscoverTab() {
   const [publicAgents, setPublicAgents] = useState<PublicAgent[]>([]);
@@ -600,76 +619,82 @@ function DiscoverTab() {
 
   if (chatAgent) {
     return (
-      <div className="space-y-4">
-        <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-          <AgentChatView
-            agent={chatAgent}
-            onBack={() => setChatAgent(null)}
-            readOnly
-          />
-        </div>
+      <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <AgentChatView agent={chatAgent} onBack={() => setChatAgent(null)} readOnly />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 flex items-center gap-5">
-        <div className="p-4 bg-[#FF6B57]/10 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <Users className="h-8 w-8 text-black" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-extrabold text-black">Discover Agents</h2>
-          <p className="text-sm font-medium text-gray-500 mt-1">
-            Chat with public agents shared by other students.
-          </p>
+      {/* Section header */}
+      <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <div className="h-1.5 bg-[#FF6B57]" />
+        <div className="p-7 flex items-center gap-5">
+          <div className="p-4 bg-[#FF6B57]/15 rounded-2xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+            <Users className="h-7 w-7 text-black" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold text-black">Discover Agents</h2>
+            <p className="text-sm font-medium text-gray-500 mt-0.5">
+              Chat with public study agents shared by other students.
+            </p>
+          </div>
+          {!loading && publicAgents.length > 0 && (
+            <span className="ml-auto px-3 py-1.5 bg-[#FF6B57] border-2 border-black rounded-full text-sm font-extrabold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              {publicAgents.length} available
+            </span>
+          )}
         </div>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 gap-3 text-gray-400">
+        <div className="flex items-center justify-center py-24 gap-3 text-gray-400">
           <Loader className="h-6 w-6 animate-spin" />
           <span className="font-bold">Loading public agents…</span>
         </div>
       ) : publicAgents.length === 0 ? (
-        <div className="text-center py-20 bg-[#FAFAFA] rounded-[2rem] border-2 border-black border-dashed">
-          <div className="w-20 h-20 bg-white rounded-full border-2 border-black flex items-center justify-center mx-auto mb-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <Users className="h-10 w-10 text-gray-300" />
+        <div className="text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-black">
+          <div className="w-20 h-20 bg-[#FAFAFA] border-2 border-black rounded-full flex items-center justify-center mx-auto mb-5">
+            <Users className="h-9 w-9 text-gray-200" />
           </div>
-          <p className="text-2xl font-extrabold text-black">No public agents yet</p>
-          <p className="text-gray-500 font-medium mt-2 max-w-sm mx-auto">
+          <p className="text-2xl font-extrabold text-black mb-2">No Public Agents Yet</p>
+          <p className="text-gray-500 font-medium max-w-sm mx-auto text-sm">
             Be the first to share — go to My Agents and flip any agent to Public.
           </p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {publicAgents.map((a) => (
             <div
               key={a.agent_id}
-              className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-7 flex flex-col gap-5 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all"
+              className="bg-white rounded-[2rem] border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-[7px_7px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-[#FF6B57]/10 rounded-xl border-2 border-black shrink-0">
-                  <Bot className="h-6 w-6 text-black" />
+              <div className="h-1.5 bg-[#FF6B57]" />
+              <div className="p-7 flex flex-col gap-4 flex-1">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-[#FF6B57]/15 rounded-xl border-2 border-black shrink-0">
+                    <Bot className="h-6 w-6 text-black" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-extrabold text-black truncate">{a.name}</h3>
+                    <p className="text-sm font-medium text-gray-500 mt-1 line-clamp-2">{a.description}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-lg font-extrabold text-black truncate">{a.name}</h3>
-                  <p className="text-sm font-medium text-gray-500 mt-1 line-clamp-2">{a.description}</p>
+
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#FAFAFA] border-2 border-black rounded-xl">
+                  <Eye className="h-3.5 w-3.5 text-[#FF6B57] shrink-0" />
+                  <span className="text-xs font-bold text-black">Shared by a student</span>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2 px-3 py-2 bg-[#FAFAFA] border-2 border-black rounded-xl">
-                <Eye className="h-3.5 w-3.5 text-[#FF6B57] shrink-0" />
-                <span className="text-xs font-bold text-black">Shared by a student</span>
+                <button
+                  onClick={() => setChatAgent(a)}
+                  className="mt-auto flex items-center justify-center gap-2 px-4 py-3 bg-black text-white border-2 border-black rounded-full font-extrabold text-sm hover:bg-gray-800 transition-colors shadow-[3px_3px_0px_0px_rgba(255,107,87,1)]"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Start Chat
+                </button>
               </div>
-
-              <button
-                onClick={() => setChatAgent(a)}
-                className="mt-auto flex items-center justify-center gap-2 px-4 py-3 bg-black text-white border-2 border-black rounded-full font-bold text-sm hover:bg-gray-800 transition-colors shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]"
-              >
-                <MessageSquare className="h-4 w-4" />
-                Start Chat
-              </button>
             </div>
           ))}
         </div>
@@ -678,7 +703,7 @@ function DiscoverTab() {
   );
 }
 
-// ── My Agents tab ──────────────────────────────────────────────────────────
+// ── My Agents Tab ──────────────────────────────────────────────────────────
 
 type InnerView = 'list' | 'docs' | 'chat';
 
@@ -768,7 +793,6 @@ function MyAgentsTab() {
     }
   };
 
-  // Inner views
   if (activeAgent && innerView === 'chat') {
     return (
       <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
@@ -787,58 +811,65 @@ function MyAgentsTab() {
     );
   }
 
-  // Agent list
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Hero header */}
-      <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-        <div className="flex items-center gap-5">
-          <div className="p-4 bg-[#FF6B57]/10 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <Sparkles className="h-8 w-8 text-black" />
+      <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <div className="h-1.5 bg-[#FF6B57]" />
+        <div className="p-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="flex items-center gap-5">
+            <div className="p-4 bg-[#FF6B57]/15 rounded-2xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <Sparkles className="h-7 w-7 text-black" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-extrabold text-black">My Study Agents</h2>
+              <p className="text-sm font-medium text-gray-500 mt-0.5">
+                Create AI agents, feed them your notes, and get personalized help.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-3xl font-extrabold text-black">My Personal Agents</h2>
-            <p className="text-sm font-medium text-gray-500 mt-1">
-              Create your own AI agents, feed them documents, and choose who can use them.
-            </p>
-          </div>
+          <button
+            onClick={() => { setShowCreate(!showCreate); setCreateError(''); }}
+            className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 border-black font-extrabold text-sm transition-all shrink-0
+              ${showCreate
+                ? 'bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                : 'bg-black text-white hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]'}`}
+          >
+            {showCreate ? <><X className="h-4 w-4" /> Cancel</> : <><Plus className="h-4 w-4" /> New Agent</>}
+          </button>
         </div>
-        <button
-          onClick={() => { setShowCreate(!showCreate); setCreateError(''); }}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 border-black font-bold text-sm transition-all shrink-0
-            ${showCreate
-              ? 'bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-              : 'bg-black text-white hover:bg-gray-800 shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]'}`}
-        >
-          {showCreate ? <><X className="h-4 w-4" /> Cancel</> : <><Plus className="h-4 w-4" /> New Agent</>}
-        </button>
       </div>
 
       {/* Create form */}
       {showCreate && (
-        <div className="bg-[#FAFAFA] p-8 rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-          <h3 className="text-xl font-extrabold text-black mb-6">Create New Personal Agent</h3>
-          <form onSubmit={handleCreate} className="space-y-5">
+        <div className="bg-[#FAFAFA] rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="px-8 py-5 border-b-2 border-black bg-white flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#FF6B57] border-2 border-black rounded-lg flex items-center justify-center">
+              <Plus className="h-4 w-4 text-black" />
+            </div>
+            <h3 className="text-lg font-extrabold text-black">Create New Agent</h3>
+          </div>
+          <form onSubmit={handleCreate} className="p-8 space-y-5">
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-black uppercase tracking-wider">Agent Name</label>
+              <label className="block text-xs font-extrabold text-black uppercase tracking-widest">Agent Name</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. My Physics Study Bot"
-                className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:border-[#FF6B57] transition-colors bg-white font-bold text-lg placeholder-gray-400"
+                className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:border-[#FF6B57] transition-colors bg-white font-bold text-base placeholder-gray-300"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-black uppercase tracking-wider">What will this agent help with?</label>
+              <label className="block text-xs font-extrabold text-black uppercase tracking-widest">What will this agent help with?</label>
               <textarea
                 required
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                placeholder="e.g. Answering questions from my physics lecture notes..."
-                className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:border-[#FF6B57] transition-colors bg-white font-bold placeholder-gray-400 resize-none"
+                placeholder="e.g. Answering questions from my physics lecture notes…"
+                className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:border-[#FF6B57] transition-colors bg-white font-bold placeholder-gray-300 resize-none"
               />
             </div>
 
@@ -849,11 +880,11 @@ function MyAgentsTab() {
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 disabled={createLoading || !name.trim() || !description.trim()}
-                className="bg-[#FF6B57] text-black px-10 py-4 rounded-full font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="flex items-center gap-2 px-8 py-3.5 bg-[#FF6B57] text-black rounded-full font-extrabold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createLoading
                   ? <><Loader className="h-4 w-4 animate-spin" /> Creating…</>
@@ -866,126 +897,130 @@ function MyAgentsTab() {
 
       {/* Agent cards */}
       {agentsLoading ? (
-        <div className="flex items-center justify-center py-20 gap-3 text-gray-400">
+        <div className="flex items-center justify-center py-24 gap-3 text-gray-400">
           <Loader className="h-6 w-6 animate-spin" />
           <span className="font-bold">Loading your agents…</span>
         </div>
       ) : agents.length === 0 ? (
-        <div className="text-center py-20 bg-[#FAFAFA] rounded-[2rem] border-2 border-black border-dashed">
-          <div className="w-20 h-20 bg-white rounded-full border-2 border-black flex items-center justify-center mx-auto mb-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <Sparkles className="h-10 w-10 text-[#FF6B57]" />
+        <div className="text-center py-24 bg-white rounded-[2rem] border-2 border-dashed border-black">
+          <div className="w-20 h-20 bg-[#FAFAFA] border-2 border-black rounded-full flex items-center justify-center mx-auto mb-5 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+            <Sparkles className="h-9 w-9 text-[#FF6B57]" />
           </div>
-          <p className="text-2xl font-extrabold text-black">No personal agents yet</p>
-          <p className="text-gray-500 font-medium mt-2 max-w-sm mx-auto">
+          <p className="text-2xl font-extrabold text-black mb-2">No Agents Yet</p>
+          <p className="text-gray-500 font-medium max-w-sm mx-auto text-sm mb-6">
             Create your first agent, upload study notes, and start getting personalized answers.
           </p>
           <button
             onClick={() => setShowCreate(true)}
-            className="mt-6 inline-flex items-center gap-2 px-8 py-3 bg-black text-white rounded-full border-2 border-black font-bold shadow-[4px_4px_0px_0px_rgba(255,107,87,1)] hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-black text-white rounded-full border-2 border-black font-extrabold shadow-[4px_4px_0px_0px_rgba(255,107,87,1)] hover:bg-gray-800 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Create Your First Agent
           </button>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {agents.map((a) => (
             <div
               key={a.agent_id}
-              className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-7 flex flex-col gap-5 hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all"
+              className="bg-white rounded-[2rem] border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-[7px_7px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              {/* Top */}
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-[#FF6B57]/10 rounded-xl border-2 border-black shrink-0">
-                  <Bot className="h-6 w-6 text-black" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-lg font-extrabold text-black truncate">{a.name}</h3>
-                  <p className="text-sm font-medium text-gray-500 mt-1 line-clamp-2">{a.description}</p>
-                </div>
-              </div>
+              {/* Top accent */}
+              <div className={`h-1.5 ${a.is_public ? 'bg-[#FF6B57]' : 'bg-gray-300'}`} />
 
-              {/* Public / Private toggle */}
-              <button
-                onClick={() => handleTogglePublic(a.agent_id, a.is_public ?? false)}
-                disabled={togglingId === a.agent_id}
-                className={`flex items-center justify-between w-full px-4 py-3 rounded-full border-2 border-black font-bold text-sm transition-all
-                  ${a.is_public
-                    ? 'bg-[#FF6B57]/10 text-black shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]'
-                    : 'bg-gray-100 text-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'}`}
-              >
-                <span className="flex items-center gap-2">
-                  {togglingId === a.agent_id ? (
-                    <Loader className="h-4 w-4 animate-spin" />
-                  ) : a.is_public ? (
-                    <><Unlock className="h-4 w-4" /> Public — anyone can chat</>
-                  ) : (
-                    <><Lock className="h-4 w-4" /> Private — only you</>
-                  )}
-                </span>
-                {/* pill toggle */}
-                <span className={`w-9 h-5 rounded-full border-2 border-black relative transition-colors shrink-0 ${a.is_public ? 'bg-black' : 'bg-gray-300'}`}>
-                  <span className={`absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white border border-black transition-all ${a.is_public ? 'left-[18px]' : 'left-0.5'}`} />
-                </span>
-              </button>
-
-              {/* Visibility hint */}
-              <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-black text-xs font-bold
-                ${a.is_public ? 'bg-[#FF6B57]/5 text-black' : 'bg-[#FAFAFA] text-gray-500'}`}
-              >
-                {a.is_public
-                  ? <><Eye className="h-3.5 w-3.5 text-[#FF6B57] shrink-0" /> Visible in Discover tab for all students</>
-                  : <><EyeOff className="h-3.5 w-3.5 shrink-0" /> Only visible to you</>}
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 mt-auto">
-                <button
-                  onClick={() => { setActiveAgent(a); setInnerView('docs'); }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-black rounded-full font-bold text-sm hover:bg-black hover:text-white transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                >
-                  <Settings className="h-4 w-4" />
-                  Manage
-                </button>
-                <button
-                  onClick={() => { setActiveAgent(a); setInnerView('chat'); }}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-black text-white border-2 border-black rounded-full font-bold text-sm hover:bg-gray-800 transition-colors shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Chat
-                </button>
-                <button
-                  onClick={() => setConfirmDeleteId(a.agent_id)}
-                  className="p-3 bg-white border-2 border-black rounded-full text-red-500 hover:bg-red-500 hover:text-white transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                  title="Delete agent"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Confirm delete */}
-              {confirmDeleteId === a.agent_id && (
-                <div className="bg-red-50 border-2 border-red-400 rounded-[1.5rem] p-4 flex flex-col gap-3">
-                  <p className="text-sm font-bold text-red-700">Delete this agent? All documents and chat history will be permanently removed.</p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleDeleteAgent(a.agent_id)}
-                      disabled={deletingId === a.agent_id}
-                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white border-2 border-black rounded-full font-bold text-sm hover:bg-red-600 transition-colors disabled:opacity-50"
-                    >
-                      {deletingId === a.agent_id
-                        ? <><Loader className="h-4 w-4 animate-spin" /> Deleting…</>
-                        : <><Trash2 className="h-4 w-4" /> Yes, Delete</>}
-                    </button>
-                    <button
-                      onClick={() => setConfirmDeleteId(null)}
-                      className="flex-1 px-4 py-2 bg-white border-2 border-black rounded-full font-bold text-sm hover:bg-gray-100 transition-colors"
-                    >
-                      Cancel
-                    </button>
+              <div className="p-6 flex flex-col gap-4 flex-1">
+                {/* Agent identity */}
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-[#FF6B57]/15 rounded-xl border-2 border-black shrink-0">
+                    <Bot className="h-6 w-6 text-black" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-extrabold text-black truncate">{a.name}</h3>
+                    <p className="text-sm font-medium text-gray-500 mt-0.5 line-clamp-2">{a.description}</p>
                   </div>
                 </div>
-              )}
+
+                {/* Public/Private toggle */}
+                <button
+                  onClick={() => handleTogglePublic(a.agent_id, a.is_public ?? false)}
+                  disabled={togglingId === a.agent_id}
+                  className={`flex items-center justify-between w-full px-4 py-3 rounded-full border-2 border-black font-bold text-sm transition-all
+                    ${a.is_public
+                      ? 'bg-[#FF6B57]/10 text-black shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]'
+                      : 'bg-gray-100 text-gray-600 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'}`}
+                >
+                  <span className="flex items-center gap-2">
+                    {togglingId === a.agent_id ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : a.is_public ? (
+                      <><Unlock className="h-4 w-4" /> Public — anyone can chat</>
+                    ) : (
+                      <><Lock className="h-4 w-4" /> Private — only you</>
+                    )}
+                  </span>
+                  <span className={`w-9 h-5 rounded-full border-2 border-black relative transition-colors shrink-0 ${a.is_public ? 'bg-black' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white border border-black transition-all ${a.is_public ? 'left-[18px]' : 'left-0.5'}`} />
+                  </span>
+                </button>
+
+                {/* Visibility hint */}
+                <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-black text-xs font-bold
+                  ${a.is_public ? 'bg-[#FF6B57]/5 text-black' : 'bg-[#FAFAFA] text-gray-500'}`}
+                >
+                  {a.is_public
+                    ? <><Eye className="h-3.5 w-3.5 text-[#FF6B57] shrink-0" /> Visible in Discover for all students</>
+                    : <><EyeOff className="h-3.5 w-3.5 shrink-0" /> Only visible to you</>}
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-2.5 mt-auto">
+                  <button
+                    onClick={() => { setActiveAgent(a); setInnerView('docs'); }}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-white border-2 border-black rounded-full font-bold text-sm hover:bg-black hover:text-white transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  >
+                    <Settings className="h-3.5 w-3.5" />
+                    Manage
+                  </button>
+                  <button
+                    onClick={() => { setActiveAgent(a); setInnerView('chat'); }}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-black text-white border-2 border-black rounded-full font-bold text-sm hover:bg-gray-800 transition-colors shadow-[3px_3px_0px_0px_rgba(255,107,87,1)]"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Chat
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteId(a.agent_id)}
+                    className="p-2.5 bg-white border-2 border-black rounded-full text-red-500 hover:bg-red-500 hover:text-white transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                    title="Delete agent"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* Confirm delete */}
+                {confirmDeleteId === a.agent_id && (
+                  <div className="bg-red-50 border-2 border-red-400 rounded-[1.5rem] p-4 flex flex-col gap-3">
+                    <p className="text-sm font-bold text-red-700">Delete this agent? All documents and chat history will be permanently removed.</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleDeleteAgent(a.agent_id)}
+                        disabled={deletingId === a.agent_id}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white border-2 border-black rounded-full font-bold text-sm hover:bg-red-600 transition-colors disabled:opacity-50"
+                      >
+                        {deletingId === a.agent_id
+                          ? <><Loader className="h-4 w-4 animate-spin" /> Deleting…</>
+                          : <><Trash2 className="h-4 w-4" /> Yes, Delete</>}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="flex-1 px-4 py-2 bg-white border-2 border-black rounded-full font-bold text-sm hover:bg-gray-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -994,31 +1029,31 @@ function MyAgentsTab() {
   );
 }
 
-// ── Root page ──────────────────────────────────────────────────────────────
+// ── Root Page ──────────────────────────────────────────────────────────────
 
 export default function PersonalAgentPanel() {
   const [tab, setTab] = useState<PanelTab>('my-agents');
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Tab switcher */}
-      <div className="flex gap-3">
+      <div className="flex items-center gap-2 bg-white border-2 border-black rounded-full p-1.5 w-fit shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
         <button
           onClick={() => setTab('my-agents')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 border-black font-bold text-sm transition-all
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full border-2 font-extrabold text-sm transition-all
             ${tab === 'my-agents'
-              ? 'bg-black text-white shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]'
-              : 'bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'}`}
+              ? 'bg-black text-white border-black shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]'
+              : 'bg-transparent text-gray-500 border-transparent hover:bg-[#FAFAFA] hover:text-black'}`}
         >
           <Sparkles className="h-4 w-4" />
           My Agents
         </button>
         <button
           onClick={() => setTab('discover')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 border-black font-bold text-sm transition-all
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full border-2 font-extrabold text-sm transition-all
             ${tab === 'discover'
-              ? 'bg-black text-white shadow-[4px_4px_0px_0px_rgba(255,107,87,1)]'
-              : 'bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'}`}
+              ? 'bg-black text-white border-black shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]'
+              : 'bg-transparent text-gray-500 border-transparent hover:bg-[#FAFAFA] hover:text-black'}`}
         >
           <Users className="h-4 w-4" />
           Discover
