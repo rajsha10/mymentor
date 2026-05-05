@@ -29,36 +29,36 @@ function stableClassId(s: string): number {
 function QuestionPreview({ q, index }: { q: AssignmentQuestion; index: number }) {
   const [open, setOpen] = useState(index === 0);
   return (
-    <div className={`border-2 border-black rounded-[2rem] overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all ${open ? 'bg-white' : 'bg-white hover:bg-gray-50'}`}>
+    <div className={`border-2 border-black rounded-3xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all ${open ? 'bg-white' : 'bg-white hover:bg-gray-50'}`}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-8 py-6 text-left transition-colors"
+        className="w-full flex items-center justify-between px-6 py-4 text-left transition-colors"
       >
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-black text-white border-2 border-black rounded-xl flex items-center justify-center font-black text-xs shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-black text-white border-2 border-black rounded-lg flex items-center justify-center font-black text-[10px] shadow-[1.5px_1.5px_0px_0px_rgba(255,107,87,1)]">
             Q{index + 1}
           </div>
           <div>
-            <p className="text-xs font-black text-black uppercase tracking-widest">{TYPE_LABELS[q.type]?.label || q.type}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{q.marks} MARKS AVAILABLE</span>
+            <p className="text-[10px] font-black text-black uppercase tracking-widest">{TYPE_LABELS[q.type]?.label || q.type}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{q.marks} MARKS AVAILABLE</span>
             </div>
           </div>
         </div>
-        <div className={`w-8 h-8 border-2 border-black rounded-lg flex items-center justify-center transition-transform duration-300 ${open ? 'rotate-180 bg-black text-white' : 'bg-white text-black'}`}>
-          <ChevronDown className="h-4 w-4" />
+        <div className={`w-6 h-6 border-2 border-black rounded-md flex items-center justify-center transition-transform duration-300 ${open ? 'rotate-180 bg-black text-white' : 'bg-white text-black'}`}>
+          <ChevronDown className="h-3.5 w-3.5" />
         </div>
       </button>
       {open && (
-        <div className="px-8 pb-8 border-t-2 border-black/5 animate-in slide-in-from-top-2 duration-200">
-          <p className="text-lg font-black text-black pt-6 leading-relaxed uppercase tracking-tight">{q.question}</p>
+        <div className="px-6 pb-6 border-t-2 border-black/5 animate-in slide-in-from-top-2 duration-200">
+          <p className="text-base font-black text-black pt-4 leading-relaxed uppercase tracking-tight">{q.question}</p>
           {q.guidance && (
-            <div className="mt-6 bg-[#FDFDFD] border-2 border-black border-dashed rounded-[1.5rem] p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-1.5 h-4 bg-brand-coral rounded-full" />
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pedagogical Guidance</p>
+            <div className="mt-4 bg-[#FDFDFD] border-2 border-black border-dashed rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1 h-3 bg-brand-coral rounded-full" />
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Pedagogical Guidance</p>
               </div>
-              <p className="text-sm font-bold text-gray-600 leading-relaxed italic">"{q.guidance}"</p>
+              <p className="text-xs font-bold text-gray-600 leading-relaxed italic">"{q.guidance}"</p>
             </div>
           )}
         </div>
@@ -128,17 +128,17 @@ export default function TeacherAssignmentGenerator({
   const minDeadline = new Date(Date.now() + 3600_000).toISOString().slice(0, 16);
 
   return (
-    <div className="p-8 sm:p-12 max-w-5xl mx-auto space-y-12 bg-white">
+    <div className="p-6 sm:p-8 max-w-5xl mx-auto space-y-10 bg-white">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b-4 border-black pb-8">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-black rounded-[1.5rem] border-4 border-black flex items-center justify-center shadow-[6px_6px_0px_0px_rgba(255,107,87,1)] rotate-[-3deg]">
-            <BookOpen className="h-8 w-8 text-white" />
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 border-b-4 border-black pb-6">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 bg-black rounded-2xl border-4 border-black flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(255,107,87,1)] rotate-[-3deg]">
+            <BookOpen className="h-7 w-7 text-white" />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-black leading-none tracking-tight">Assignment Lab</h2>
-            <div className="flex items-center gap-3 mt-3">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] bg-gray-50 px-3 py-1 border-2 border-black rounded-lg">
+            <h2 className="text-2xl font-black text-black leading-none tracking-tight">Assignment Lab</h2>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] bg-gray-50 px-2 py-0.5 border-2 border-black rounded-lg">
                 Neural Task Synthesis
               </span>
             </div>
@@ -146,74 +146,74 @@ export default function TeacherAssignmentGenerator({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Config Sidebar */}
-        <div className="lg:col-span-5 space-y-8">
-          <div className="bg-[#FDFDFD] border-4 border-black rounded-[2.5rem] shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] p-8 space-y-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-1.5 h-5 bg-brand-coral rounded-full" />
-              <h3 className="text-xs font-black text-black uppercase tracking-[0.3em]">Curriculum Settings</h3>
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-[#FDFDFD] border-4 border-black rounded-3xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-6 space-y-6">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-1 h-4 bg-brand-coral rounded-full" />
+              <h3 className="text-[10px] font-black text-black uppercase tracking-[0.3em]">Curriculum Settings</h3>
             </div>
 
             {/* Agent selector */}
-            <div className="space-y-3">
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Knowledge Source (Agent)</label>
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Knowledge Source (Agent)</label>
               {agentsLoading ? (
-                <div className="flex items-center gap-3 px-5 py-4 border-2 border-black rounded-2xl bg-gray-50/50">
-                  <Loader className="h-4 w-4 animate-spin text-black" />
-                  <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Syncing Agents…</span>
+                <div className="flex items-center gap-2 px-4 py-2.5 border-2 border-black rounded-xl bg-gray-50/50">
+                  <Loader className="h-3.5 w-3.5 animate-spin text-black" />
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Syncing Agents…</span>
                 </div>
               ) : agents.length === 0 ? (
-                <div className="p-5 border-2 border-black border-dashed rounded-2xl text-center">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No agents detected.</p>
+                <div className="p-4 border-2 border-black border-dashed rounded-xl text-center">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">No agents detected.</p>
                 </div>
               ) : (
                 <div className="relative">
                   <select
                     value={selectedAgentId}
                     onChange={e => setSelectedAgentId(e.target.value)}
-                    className="w-full appearance-none border-4 border-black rounded-2xl px-6 py-4 pr-12 font-black text-sm bg-white focus:outline-none focus:border-brand-coral transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]"
+                    className="w-full appearance-none border-4 border-black rounded-xl px-4 py-2.5 pr-10 font-black text-xs bg-white focus:outline-none focus:border-brand-coral transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,0.05)]"
                   >
                     <option value="">— SELECT AGENT —</option>
                     {agents.map(a => <option key={a.id} value={a.id}>{a.name.toUpperCase()}</option>)}
                   </select>
-                  <ChevronDown className="absolute right-5 top-5 h-5 w-5 pointer-events-none text-black" />
+                  <ChevronDown className="absolute right-4 top-3 h-4 w-4 pointer-events-none text-black" />
                 </div>
               )}
             </div>
 
             {/* Topic */}
-            <div className="space-y-3">
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Core Topic Focus</label>
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Core Topic Focus</label>
               <input
                 type="text"
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
                 placeholder="e.g. MOLECULAR BIOLOGY"
-                className="w-full border-4 border-black rounded-2xl px-6 py-4 font-black text-sm uppercase placeholder-gray-200 focus:outline-none focus:border-brand-coral transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]"
+                className="w-full border-4 border-black rounded-xl px-4 py-2.5 font-black text-xs uppercase placeholder-gray-200 focus:outline-none focus:border-brand-coral transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,0.05)]"
               />
             </div>
 
             {/* Assignment types */}
-            <div className="space-y-3">
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Task Modalities</label>
-              <div className="space-y-3">
+            <div className="space-y-2">
+              <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Task Modalities</label>
+              <div className="space-y-2">
                 {(Object.keys(TYPE_LABELS) as AssignmentType[]).map(t => {
                   const selected = assignmentTypes.includes(t);
                   return (
                     <button
                       key={t}
                       onClick={() => toggleType(t)}
-                      className={`w-full group flex items-center gap-4 px-5 py-4 rounded-2xl border-2 text-left transition-all ${
+                      className={`w-full group flex items-center gap-3 px-4 py-2.5 rounded-xl border-2 text-left transition-all ${
                         selected
-                          ? 'bg-black text-white border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
+                          ? 'bg-black text-white border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]'
                           : 'bg-white border-black/10 text-gray-400 hover:border-black hover:text-black'
                       }`}
                     >
-                      {selected ? <CheckSquare className="h-4 w-4 shrink-0 text-brand-coral" /> : <Square className="h-4 w-4 shrink-0" />}
+                      {selected ? <CheckSquare className="h-3.5 w-3.5 shrink-0 text-brand-coral" /> : <Square className="h-3.5 w-3.5 shrink-0" />}
                       <div className="flex-1">
-                        <p className="font-black text-[10px] uppercase tracking-widest">{TYPE_LABELS[t].label}</p>
-                        <p className={`text-[9px] font-bold mt-1 ${selected ? 'text-gray-400' : 'text-gray-300'}`}>{TYPE_MARKS[t]} MARKS EACH</p>
+                        <p className="font-black text-[9px] uppercase tracking-widest">{TYPE_LABELS[t].label}</p>
+                        <p className={`text-[8px] font-bold mt-0.5 ${selected ? 'text-gray-400' : 'text-gray-300'}`}>{TYPE_MARKS[t]} MARKS EACH</p>
                       </div>
                     </button>
                   );
@@ -222,105 +222,105 @@ export default function TeacherAssignmentGenerator({
             </div>
 
             {/* Count & Deadline */}
-            <div className="grid grid-cols-1 gap-6">
-              <div className="space-y-3">
+            <div className="grid grid-cols-1 gap-5">
+              <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Item Count</label>
-                  <span className="text-xl font-black text-brand-coral">{count}</span>
+                  <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Item Count</label>
+                  <span className="text-lg font-black text-brand-coral">{count}</span>
                 </div>
                 <input
                   type="range" min={1} max={10} value={count}
                   onChange={e => setCount(Number(e.target.value))}
-                  className="w-full accent-black cursor-pointer"
+                  className="w-full accent-black cursor-pointer h-1.5"
                 />
               </div>
 
-              <div className="space-y-3">
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Submission Deadline</label>
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Submission Deadline</label>
                 <div className="relative">
                   <input
                     type="datetime-local"
                     min={minDeadline}
                     value={deadline}
                     onChange={e => setDeadline(e.target.value)}
-                    className="w-full border-4 border-black rounded-2xl px-6 py-4 font-black text-xs focus:outline-none focus:border-brand-coral transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)]"
+                    className="w-full border-4 border-black rounded-xl px-4 py-2.5 font-black text-[10px] focus:outline-none focus:border-brand-coral transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,0.05)]"
                   />
-                  <Calendar className="absolute right-5 top-4.5 h-4 w-4 text-black pointer-events-none" />
+                  <Calendar className="absolute right-4 top-3 h-3.5 w-3.5 text-black pointer-events-none" />
                 </div>
               </div>
             </div>
 
             {error && (
-              <div className="flex items-start gap-3 bg-red-50 border-2 border-black p-4 rounded-xl text-red-600 animate-in fade-in duration-200">
-                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                <p className="text-[10px] font-black uppercase tracking-widest leading-relaxed">{error}</p>
+              <div className="flex items-start gap-2 bg-red-50 border-2 border-black p-3 rounded-lg text-red-600 animate-in fade-in duration-200">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <p className="text-[9px] font-black uppercase tracking-widest leading-relaxed">{error}</p>
               </div>
             )}
 
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="w-full py-5 bg-brand-coral text-black font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 mt-4"
+              className="w-full py-3.5 bg-brand-coral text-black font-black uppercase tracking-[0.3em] text-[9px] rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px] hover:shadow-[7px_7px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
             >
               {loading ? (
-                <><Loader className="h-4 w-4 animate-spin" /> SYNTHESIZING…</>
+                <><Loader className="h-3.5 w-3.5 animate-spin" /> SYNTHESIZING…</>
               ) : (
-                <><Bot className="h-5 w-5" /> GENERATE ASSIGNMENTS</>
+                <><Bot className="h-4 w-4" /> GENERATE ASSIGNMENTS</>
               )}
             </button>
           </div>
         </div>
 
         {/* Results Main Area */}
-        <div className="lg:col-span-7 space-y-10">
+        <div className="lg:col-span-7 space-y-8">
           {!result && !loading && (
-            <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-center border-4 border-black border-dashed rounded-[3rem] bg-gray-50/30 p-12">
-              <div className="w-20 h-20 bg-white border-4 border-black rounded-[2rem] flex items-center justify-center mb-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                <BookOpen className="h-10 w-10 text-gray-200" />
+            <div className="h-full min-h-[400px] flex flex-col items-center justify-center text-center border-4 border-black border-dashed rounded-3xl bg-gray-50/30 p-8">
+              <div className="w-16 h-16 bg-white border-4 border-black rounded-2xl flex items-center justify-center mb-6 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
+                <BookOpen className="h-8 w-8 text-gray-200" />
               </div>
-              <h3 className="text-2xl font-black text-black uppercase tracking-tight">System Idle</h3>
-              <p className="text-xs font-black text-gray-400 uppercase tracking-widest mt-3 max-w-sm leading-relaxed">
+              <h3 className="text-xl font-black text-black uppercase tracking-tight">System Idle</h3>
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2 max-w-sm leading-relaxed">
                 Configure task parameters on the left to synthesize new graded assignments from your agent's neural repository.
               </p>
             </div>
           )}
 
           {loading && (
-            <div className="h-full min-h-[500px] flex flex-col items-center justify-center gap-8 border-4 border-black border-dashed rounded-[3rem] bg-gray-50/50 p-12">
+            <div className="h-full min-h-[400px] flex flex-col items-center justify-center gap-6 border-4 border-black border-dashed rounded-3xl bg-gray-50/50 p-8">
               <div className="relative">
-                <div className="w-24 h-24 border-[6px] border-black rounded-full border-t-brand-coral animate-spin" />
-                <Bot className="absolute inset-0 m-auto h-10 w-10 text-black" />
+                <div className="w-20 h-20 border-[6px] border-black rounded-full border-t-brand-coral animate-spin" />
+                <Bot className="absolute inset-0 m-auto h-8 w-8 text-black" />
               </div>
-              <div className="space-y-2 text-center">
-                <p className="text-xl font-black text-black uppercase tracking-tight">Synthesis in Progress</p>
-                <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] animate-pulse">Mapping curricular requirements…</p>
+              <div className="space-y-1 text-center">
+                <p className="text-lg font-black text-black uppercase tracking-tight">Synthesis in Progress</p>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.4em] animate-pulse">Mapping curricular requirements…</p>
               </div>
             </div>
           )}
 
           {result && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="flex items-center justify-between bg-black rounded-[2rem] p-8 text-white shadow-[8px_8px_0px_0px_rgba(255,107,87,1)]">
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="flex items-center justify-between bg-black rounded-3xl p-6 text-white shadow-[6px_6px_0px_0px_rgba(255,107,87,1)]">
                 <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tight">{result.topic}</h3>
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-3">
+                  <h3 className="text-xl font-black uppercase tracking-tight">{result.topic}</h3>
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">
                     Deadline Protocol: {new Date(result.deadline).toLocaleString()}
                   </p>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    <span className="text-[9px] font-black uppercase px-3 py-1 rounded-lg border border-white/20 bg-brand-coral/10 text-brand-coral">
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-lg border border-white/20 bg-brand-coral/10 text-brand-coral">
                       {result.questions.reduce((s, q) => s + q.marks, 0)} TOTAL MARKS
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 bg-green-400 rounded-2xl border-2 border-black flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(255,255,255,0.2)]">
-                    <CheckSquare className="h-6 w-6 text-black" />
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-10 h-10 bg-green-400 rounded-xl border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_0px_rgba(255,255,255,0.2)]">
+                    <CheckSquare className="h-5 w-5 text-black" />
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-green-400">Published</span>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-green-400">Published</span>
                 </div>
               </div>
               
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {result.questions.map((q, i) => (
                   <QuestionPreview key={i} q={q} index={i} />
                 ))}

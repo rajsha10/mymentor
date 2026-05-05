@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { Check, X, Mail, BookOpen, Clock } from 'lucide-react';
 
 export default function PendingTeachers() {
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -42,48 +43,63 @@ export default function PendingTeachers() {
   };
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-black text-black">Pending Teacher Approvals</h2>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-700">
+      <div>
+        <h2 className="text-2xl font-black text-black">Pending Approvals</h2>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-0.5">Educator applications</p>
+      </div>
+
       {teachers.length === 0 ? (
-        <div className="text-center py-16 bg-[#FAFAFA] rounded-[2rem] border-2 border-black border-dashed">
-          <p className="text-xl font-bold text-gray-500 uppercase tracking-widest">No pending approvals.</p>
+        <div className="text-center py-12 bg-white rounded-2xl border-2 border-black border-dashed">
+          <p className="text-sm font-black text-gray-400 uppercase tracking-widest">No pending applications</p>
         </div>
       ) : (
-        <div className="bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-          <ul className="divide-y-2 divide-black">
-            {teachers.map((teacher) => (
-              <li key={teacher.id}>
-                <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-[#FFF9C4] transition-colors gap-4 sm:gap-0">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-14 w-14 rounded-full border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-black font-black text-xl">
-                      {teacher.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="ml-5">
-                      <h3 className="text-xl font-extrabold text-black leading-tight">{teacher.name}</h3>
-                      <p className="text-sm font-bold text-gray-500 mt-1 uppercase tracking-wider">{teacher.email}</p>
-                      <p className="text-sm font-black text-black mt-2 bg-[#FAFAFA] px-3 py-1 inline-block border-2 border-black rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase tracking-wide">
-                        Subject: {teacher.subject}
-                      </p>
-                    </div>
+        <div className="grid grid-cols-1 gap-4">
+          {teachers.map((teacher) => (
+            <div 
+              key={teacher.id}
+              className="bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden group"
+            >
+              <div className="p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-5">
+                  <div className="h-14 w-14 rounded-xl border-2 border-black bg-[#FFF9C4] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center text-black font-black text-xl">
+                    {teacher.name?.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex space-x-3 w-full sm:w-auto mt-4 sm:mt-0">
-                    <button
-                      onClick={() => handleApprove(teacher.id)}
-                      className="flex-1 sm:flex-none inline-flex justify-center items-center px-6 py-3 border-2 border-black font-extrabold rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-black bg-green-400 hover:bg-green-500 hover:-translate-y-0.5 transition-all text-sm uppercase tracking-wider"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(teacher.id)}
-                      className="flex-1 sm:flex-none inline-flex justify-center items-center px-6 py-3 border-2 border-black font-extrabold rounded-full shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-white bg-red-500 hover:bg-red-600 hover:-translate-y-0.5 transition-all text-sm uppercase tracking-wider"
-                    >
-                      Reject
-                    </button>
+                  
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-black leading-none">{teacher.name}</h3>
+                    <div className="flex flex-wrap items-center gap-4 pt-1">
+                      <div className="flex items-center text-[11px] text-gray-400 font-bold">
+                        <Mail size={12} className="mr-1.5 text-black" />
+                        {teacher.email}
+                      </div>
+                      <div className="flex items-center text-[11px] text-gray-400 font-bold">
+                        <BookOpen size={12} className="mr-1.5 text-black" />
+                        {teacher.subject}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </li>
-            ))}
-          </ul>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleApprove(teacher.id)}
+                    className="flex-1 inline-flex items-center justify-center px-4 py-2 border-2 border-black font-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-black bg-green-400 hover:bg-green-500 active:shadow-none transition-all uppercase tracking-widest text-[10px]"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleReject(teacher.id)}
+                    className="flex-1 inline-flex items-center justify-center px-4 py-2 border-2 border-black font-black rounded-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] text-white bg-red-500 hover:bg-red-600 active:shadow-none transition-all uppercase tracking-widest text-[10px]"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Decline
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

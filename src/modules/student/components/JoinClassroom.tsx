@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { collection, query, where, getDocs, updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
+import { Sparkles } from 'lucide-react';
 
 export default function JoinClassroom({ onJoined }: { onJoined: () => void }) {
   const { user } = useAuth();
@@ -67,17 +68,31 @@ export default function JoinClassroom({ onJoined }: { onJoined: () => void }) {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-extrabold text-black mb-6">Join a Classroom</h2>
-      {error && <div className="mb-6 bg-[#FF6B57] text-white p-4 rounded-2xl font-medium border border-black">{error}</div>}
-      {success && <div className="mb-6 bg-[#FAFAFA] text-black p-4 rounded-2xl font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">{success}</div>}
-      <form onSubmit={handleJoin} className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+    <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+      <h2 className="text-xl font-black text-black uppercase tracking-tight mb-4 flex items-center gap-2">
+         <Sparkles className="h-5 w-5 text-[#FF6B57]" />
+         Join a Classroom
+      </h2>
+      
+      {error && (
+        <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div className="mb-6 bg-green-50 text-green-700 p-4 rounded-2xl font-black text-xs uppercase tracking-widest border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          {success}
+        </div>
+      )}
+
+      <form onSubmit={handleJoin} className="flex flex-col gap-4">
+        <div className="relative group">
           <input
             type="text"
             required
-            placeholder="Enter Class Code (e.g., PHY9K2X)"
-            className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400 uppercase font-bold tracking-widest text-center sm:text-left"
+            placeholder="CODE (e.g. PHY9K2X)"
+            className="w-full px-6 py-5 border-4 border-black rounded-[1.5rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-all bg-[#FAFAFA] placeholder-gray-400 uppercase font-black tracking-widest text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
             value={classCode}
             onChange={(e) => setClassCode(e.target.value)}
           />
@@ -85,9 +100,9 @@ export default function JoinClassroom({ onJoined }: { onJoined: () => void }) {
         <button
           type="submit"
           disabled={loading || !classCode}
-          className="inline-flex items-center justify-center px-8 py-4 border-2 border-black text-lg font-bold rounded-full text-white bg-black hover:bg-gray-800 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center px-8 py-5 border-4 border-black text-sm font-black uppercase tracking-[0.2em] rounded-[1.5rem] text-white bg-black hover:bg-[#FF6B57] hover:text-black focus:outline-none transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-[6px_6px_0px_0px_rgba(255,107,87,1)] active:shadow-none active:translate-x-1 active:translate-y-1"
         >
-          {loading ? 'Joining...' : 'Join'}
+          {loading ? 'Joining...' : 'SEND REQUEST'}
         </button>
       </form>
     </div>

@@ -5,7 +5,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { uploadFile } from '../../../services/storageService';
 import { sendNotification } from '../../../services/notificationService';
 import { format } from 'date-fns';
-import { FileText, Image, Video, Link as LinkIcon, File, Trash2, Download, ExternalLink, Bot } from 'lucide-react';
+import { FileText, Image, Video, Link as LinkIcon, File, Trash2, Download, ExternalLink, Bot, ChevronDown, Plus, Clock, Loader } from 'lucide-react';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { downloadFile, openFile } from '../../../utils/downloadHelper';
 import AddToAgentModal from './AddToAgentModal';
@@ -104,137 +104,166 @@ export default function Materials({ classroomId, isTeacher }: { classroomId: str
   };
 
   return (
-    <div className="p-6 sm:p-10 space-y-8">
+    <div className="p-4 sm:p-8 lg:p-12 space-y-10">
       {isTeacher && (
-        <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <h3 className="text-2xl font-extrabold text-black">Course Materials</h3>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 bg-white p-6 sm:p-8 rounded-[2.5rem] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(255,107,87,1)]">
+              <FileText className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-black uppercase tracking-tight">Course Materials</h3>
+          </div>
           <button
             onClick={() => setShowUpload(!showUpload)}
-            className="bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition-colors shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]"
+            className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-black uppercase tracking-widest border-4 border-black transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1 ${
+              showUpload ? 'bg-white text-black' : 'bg-black text-white hover:bg-gray-800 shadow-[6px_6px_0px_0px_rgba(255,107,87,1)]'
+            }`}
           >
-            {showUpload ? 'Cancel' : 'Upload Material'}
+            {showUpload ? 'Close Upload' : 'Upload Material'}
           </button>
         </div>
       )}
 
       {showUpload && isTeacher && (
-        <div className="bg-[#FAFAFA] p-8 rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-          <form onSubmit={handleUpload} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-black uppercase tracking-wider">Title</label>
+        <div className="bg-[#FAFAFA] p-6 sm:p-10 rounded-[3rem] border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] animate-in slide-in-from-top-4 duration-300">
+          <form onSubmit={handleUpload} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <label className="block text-xs font-black text-black uppercase tracking-[0.2em] ml-2">Title</label>
                 <input
                   type="text"
                   required
-                  className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-white font-bold"
+                  className="w-full px-6 py-5 border-4 border-black rounded-[1.5rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-all bg-white font-black text-lg placeholder-gray-300 shadow-inner"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Mathematics - Chapter 1"
+                  placeholder="e.g., Quantum Mechanics Notes"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-black uppercase tracking-wider">Type</label>
-                <select
-                  className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-white font-bold"
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                >
-                  <option value="pdf">PDF Document</option>
-                  <option value="link">Study Link / URL</option>
-                </select>
+              <div className="space-y-3">
+                <label className="block text-xs font-black text-black uppercase tracking-[0.2em] ml-2">Type</label>
+                <div className="relative">
+                  <select
+                    className="w-full px-6 py-5 border-4 border-black rounded-[1.5rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-all bg-white font-black text-lg appearance-none cursor-pointer"
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                  >
+                    <option value="pdf">PDF Document</option>
+                    <option value="link">Study Link / URL</option>
+                  </select>
+                  <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 h-6 w-6 pointer-events-none" />
+                </div>
               </div>
             </div>
 
             {type === 'link' ? (
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-black uppercase tracking-wider">Link URL</label>
-                <input
-                  type="url"
-                  required
-                  className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-white font-bold"
-                  value={link}
-                  onChange={(e) => setLink(e.target.value)}
-                  placeholder="https://..."
-                />
+              <div className="space-y-3">
+                <label className="block text-xs font-black text-black uppercase tracking-[0.2em] ml-2">Link URL</label>
+                <div className="relative group">
+                  <LinkIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-[#FF6B57]" />
+                  <input
+                    type="url"
+                    required
+                    className="w-full pl-16 pr-6 py-5 border-4 border-black rounded-[1.5rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-all bg-white font-black text-lg shadow-inner"
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
+                    placeholder="https://example.com/notes"
+                  />
+                </div>
               </div>
             ) : (
-              <div className="space-y-2">
-                <label className="block text-sm font-bold text-black uppercase tracking-wider">File (PDF Only)</label>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  required
-                  className="w-full block text-sm text-black file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-2 file:border-black file:text-sm file:font-bold file:bg-[#FF6B57] file:text-black hover:file:bg-[#FF8A7A] transition-colors cursor-pointer"
-                  onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-                />
+              <div className="space-y-3">
+                <label className="block text-xs font-black text-black uppercase tracking-[0.2em] ml-2">File (PDF Only)</label>
+                <div className="group relative">
+                  <div className="absolute inset-0 bg-[#FF6B57] rounded-[1.5rem] border-4 border-black translate-x-1 translate-y-1 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    required
+                    className="w-full relative z-10 block text-sm text-black border-4 border-black rounded-[1.5rem] bg-white px-6 py-5 file:mr-6 file:py-2.5 file:px-6 file:rounded-xl file:border-2 file:border-black file:text-xs file:font-black file:bg-[#FF6B57] file:text-black file:uppercase file:tracking-widest hover:file:bg-black hover:file:text-white transition-all cursor-pointer"
+                    onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                  />
+                </div>
               </div>
             )}
 
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end pt-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-[#FF6B57] text-black px-10 py-4 rounded-full font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] focus:outline-none transition-colors disabled:opacity-50"
+                className="group flex items-center gap-3 bg-[#FF6B57] text-black px-12 py-5 rounded-2xl font-black uppercase tracking-widest border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] focus:outline-none transition-all active:shadow-none active:translate-x-1 active:translate-y-1 disabled:opacity-50"
               >
-                {loading ? 'Adding...' : 'Add Material'}
+                {loading ? <Loader className="h-6 w-6 animate-spin" /> : <Plus className="h-6 w-6" />}
+                <span>{loading ? 'Processing...' : 'Add Material'}</span>
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 sm:gap-10">
         {materials.length === 0 ? (
-          <div className="col-span-full text-center py-16 bg-[#FAFAFA] rounded-[2rem] border-2 border-black border-dashed">
-            <p className="text-xl font-bold text-black mb-2">No materials available</p>
-            <p className="text-gray-500 font-medium">Resources will appear here once uploaded.</p>
+          <div className="col-span-full text-center py-24 bg-white rounded-[3rem] border-4 border-black border-dashed opacity-60">
+             <div className="w-24 h-24 bg-gray-50 border-4 border-dashed border-black/10 rounded-full flex items-center justify-center mx-auto mb-8">
+               <File className="h-12 w-12 text-gray-300" />
+             </div>
+             <p className="text-2xl font-black text-black uppercase tracking-tight mb-2">No materials available</p>
+             <p className="text-gray-400 font-bold uppercase tracking-wide text-sm">Course resources will appear here once uploaded.</p>
           </div>
         ) : (
           materials.map((mat) => {
             const finalUrl = mat.cloudinaryUrl;
 
             return (
-              <div key={mat.id} className="group relative bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 overflow-hidden flex flex-col">
-                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  {isTeacher && (
+              <div key={mat.id} className="group relative bg-white rounded-[2.5rem] border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-2 hover:shadow-[14px_14px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 overflow-hidden flex flex-col">
+                
+                {/* Delete button (Teacher only) */}
+                {isTeacher && (
+                  <div className="absolute top-6 right-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleDelete(mat.id)}
-                      className="p-2 bg-red-500 text-white rounded-full border-2 border-black hover:bg-red-600 transition-colors shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                      title="Delete"
+                      className="w-10 h-10 bg-red-500 text-white rounded-xl border-2 border-black flex items-center justify-center hover:bg-black transition-colors shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                      title="Delete Material"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
 
+                {/* Card Content */}
                 <div
                   onClick={() => openFile(finalUrl)}
-                  style={{ cursor: 'pointer' }}
-                  className="p-6 flex-1 flex flex-col"
+                  className="p-8 cursor-pointer flex-1 flex flex-col"
                 >
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="p-4 rounded-[1rem] border-2 border-black bg-[#FAFAFA] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="flex items-start justify-between mb-8">
+                    <div className="w-16 h-16 rounded-[1.25rem] border-4 border-black bg-gray-50 flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:bg-[#FF6B57]/10 transition-colors">
                       {getIcon(mat.type)}
                     </div>
-                    <span className="text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-widest border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-[#FF6B57] text-black">
+                    <span className="text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-[0.2em] border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] bg-[#FF6B57] text-black">
                       {mat.type}
                     </span>
                   </div>
 
-                  <h4 className="text-xl font-extrabold text-black group-hover:text-[#FF6B57] transition-colors line-clamp-2 mb-2 flex-1">
+                  <h4 className="text-xl sm:text-2xl font-black text-black group-hover:text-[#FF6B57] transition-colors leading-tight uppercase tracking-tight line-clamp-2 mb-3">
                     {mat.title}
                   </h4>
-                  <p className="text-sm text-gray-500 font-bold uppercase tracking-wider mt-auto">
-                    {mat.timestamp?.toDate ? format(mat.timestamp.toDate(), 'MMMM d, yyyy') : 'Recently Added'}
-                  </p>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <Clock className="h-3.5 w-3.5 text-[#FF6B57]" />
+                    <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
+                      {mat.timestamp?.toDate ? format(mat.timestamp.toDate(), 'MMMM d, yyyy') : 'Just Added'}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="px-6 py-4 bg-[#FAFAFA] border-t-2 border-black flex items-center justify-between">
-                  <div className="flex items-center text-[10px] text-black font-extrabold uppercase tracking-widest">
-                    <div className="w-2 h-2 rounded-full border border-black bg-[#FF6B57] mr-2 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"></div>
-                    {mat.uploaderName || 'Instructor'}
+                {/* Card Footer */}
+                <div className="px-8 py-6 bg-gray-50/50 border-t-4 border-black flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_0px_rgba(255,107,87,1)]">
+                       <span className="text-white text-[10px] font-black">{mat.uploaderName?.[0] || 'I'}</span>
+                    </div>
+                    <span className="text-[10px] font-black text-black uppercase tracking-widest truncate">{mat.uploaderName || 'Instructor'}</span>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  
+                  <div className="flex items-center gap-2.5">
                     {isTeacher && mat.type === 'pdf' && (
                       <button
                         onClick={(e) => {
@@ -242,11 +271,10 @@ export default function Materials({ classroomId, isTeacher }: { classroomId: str
                           e.stopPropagation();
                           setAgentModal({ title: mat.title, url: finalUrl });
                         }}
-                        className="flex items-center space-x-1 px-4 py-2 bg-white text-black text-xs font-bold rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF6B57] transition-all active:scale-95"
+                        className="w-10 h-10 bg-white text-black rounded-xl border-2 border-black flex items-center justify-center hover:bg-[#FF6B57] transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
                         title="Add to AI Agent"
                       >
-                        <Bot className="h-4 w-4" />
-                        <span>Add to Agent</span>
+                        <Bot className="h-5 w-5" />
                       </button>
                     )}
                     <button
@@ -255,10 +283,10 @@ export default function Materials({ classroomId, isTeacher }: { classroomId: str
                         e.stopPropagation();
                         openFile(finalUrl);
                       }}
-                      className="flex items-center space-x-1 px-4 py-2 bg-white text-black text-xs font-bold rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-all active:scale-95"
+                      className="w-10 h-10 bg-white text-black rounded-xl border-2 border-black flex items-center justify-center hover:bg-gray-100 transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+                      title="View Document"
                     >
-                      <ExternalLink className="h-4 w-4" />
-                      <span>View</span>
+                      <ExternalLink className="h-5 w-5" />
                     </button>
                     <button
                       onClick={(e) => {
@@ -266,9 +294,10 @@ export default function Materials({ classroomId, isTeacher }: { classroomId: str
                         e.stopPropagation();
                         downloadFile(finalUrl, mat.title || 'material');
                       }}
-                      className="flex items-center space-x-1 px-4 py-2 bg-black text-white text-xs font-bold rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-800 transition-all active:scale-95"
+                      className="w-10 h-10 bg-black text-white rounded-xl border-2 border-black flex items-center justify-center hover:bg-gray-800 transition-all shadow-[3px_3px_0px_0px_rgba(255,107,87,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+                      title="Download"
                     >
-                      <Download className="h-4 w-4" />
+                      <Download className="h-5 w-5" />
                     </button>
                   </div>
                 </div>

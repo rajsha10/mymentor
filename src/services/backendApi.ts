@@ -255,6 +255,13 @@ export async function submitStudentTest(
   return res.json();
 }
 
+export async function getStudentTestResult(testId: number): Promise<SubmitTestResult> {
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${BACKEND_URL}/student/tests/${testId}/result`, { headers });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function answerGeneral(question: string, agentId: string) {
   const headers = await getAuthHeaders();
   const res = await fetch(`${BACKEND_URL}/answer-general`, {

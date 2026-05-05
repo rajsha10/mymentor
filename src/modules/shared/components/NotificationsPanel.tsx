@@ -76,27 +76,38 @@ export default function NotificationsPanel({ classroomId, classroomIds }: { clas
 
   if (notifications.length === 0) {
     return (
-      <div className="p-8 text-center bg-[#FAFAFA] rounded-[1rem] border-2 border-black border-dashed m-4">
-        <Bell className="mx-auto h-10 w-10 text-black mb-3 opacity-50" />
-        <p className="font-bold text-gray-500 uppercase tracking-widest text-sm">No new notifications.</p>
+      <div className="p-12 text-center bg-white rounded-[2.5rem] border-4 border-black border-dashed opacity-50 m-6">
+        <Bell className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+        <p className="font-black text-gray-400 uppercase tracking-[0.2em] text-xs">No updates yet</p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y-2 divide-black bg-white rounded-[1.5rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden m-2 sm:m-0">
+    <div className="divide-y-4 divide-black bg-white rounded-[2.5rem] border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] overflow-hidden m-4 sm:m-6">
       {notifications.map((notif) => (
-        <div key={notif.id} className="p-5 hover:bg-[#FAFAFA] transition-colors group cursor-pointer">
-          <div className="flex items-start">
-            <div className="flex-shrink-0 mt-1 p-2 rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-white group-hover:-translate-y-0.5 transition-all">
+        <div key={notif.id} className="p-6 sm:p-8 hover:bg-[#FF6B57]/5 transition-all group cursor-default relative overflow-hidden">
+          {/* Subtle hover indicator */}
+          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#FF6B57] translate-x-[-100%] group-hover:translate-x-0 transition-transform" />
+          
+          <div className="flex items-start gap-6">
+            <div className="flex-shrink-0 p-3 rounded-2xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-white group-hover:-translate-y-1 transition-all group-hover:bg-[#FF6B57]/10">
               {getIcon(notif.type)}
             </div>
-            <div className="ml-4 flex-1">
-              <p className="text-base font-extrabold text-black leading-tight">{notif.title}</p>
-              <p className="text-sm font-bold text-gray-600 mt-1.5">{notif.message}</p>
-              <p className="text-xs font-black text-[#FF6B57] mt-2 uppercase tracking-wide">
-                {notif.timestamp?.toDate ? format(notif.timestamp.toDate(), 'p • MMM d') : 'Just now'}
-              </p>
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-start mb-2">
+                 <p className="text-lg font-black text-black leading-tight uppercase tracking-tight truncate pr-4">{notif.title}</p>
+                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest shrink-0 mt-1 tabular-nums">
+                   {notif.timestamp?.toDate ? format(notif.timestamp.toDate(), 'p') : 'NOW'}
+                 </p>
+              </div>
+              <p className="text-sm font-bold text-gray-500 leading-relaxed mb-3">{notif.message}</p>
+              <div className="flex items-center gap-2">
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#FF6B57]" />
+                 <p className="text-[10px] font-black text-[#FF6B57] uppercase tracking-[0.2em]">
+                   {notif.timestamp?.toDate ? format(notif.timestamp.toDate(), 'MMMM d, yyyy') : 'Recently'}
+                 </p>
+              </div>
             </div>
           </div>
         </div>

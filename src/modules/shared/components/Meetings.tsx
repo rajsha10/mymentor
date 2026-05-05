@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
-import { signInWithPopup, linkWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { db, auth, googleProvider } from '../../../config/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
 import { sendNotification } from '../../../services/notificationService';
-import { Video } from 'lucide-react';
+import { Video, Loader } from 'lucide-react';
 
 export default function Meetings({ classroom, isTeacher }: { classroom: any, isTeacher: boolean }) {
   const { user, userData } = useAuth();
@@ -191,73 +191,105 @@ export default function Meetings({ classroom, isTeacher }: { classroom: any, isT
   };
 
   return (
-    <div className="p-6 sm:p-10 flex flex-col items-center justify-center min-h-[500px] bg-white rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] m-6">
-      <Video className="h-20 w-20 text-black mb-6" />
-      
-      {!userData?.googleConnected ? (
-        <div className="text-center space-y-6 max-w-md bg-[#FAFAFA] p-8 rounded-[1rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <h3 className="text-2xl font-extrabold text-black">Connect Your Google Account</h3>
-          <p className="text-gray-600 font-bold leading-relaxed">To participate in live classes and automatically create meetings, you need to connect your Google account first.</p>
-          <button
-            onClick={handleConnectGoogle}
-            disabled={loading}
-            className="w-full inline-flex justify-center items-center px-8 py-4 bg-white text-black text-lg font-extrabold rounded-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 transition-all"
-          >
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6 mr-3" />
-            Connect Google
-          </button>
+    <div className="p-4 sm:p-6 min-h-[400px] flex items-center justify-center">
+      <div className="w-full max-w-lg bg-white rounded-2xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 sm:p-8 relative overflow-hidden flex flex-col items-center">
+
+        {/* Decorative background icon */}
+        <div className="absolute -top-4 -right-4 opacity-5 pointer-events-none rotate-12">
+          <Video className="h-28 w-28" />
         </div>
-      ) : (
-        <>
-          {classroom.meetingActive ? (
-            <div className="text-center space-y-8 w-full max-w-lg bg-[#FAFAFA] p-10 rounded-[1.5rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <div>
-                <h3 className="text-3xl font-black text-black mb-4 uppercase tracking-wider">Meeting is Live!</h3>
-                <div className="text-5xl font-extrabold text-black bg-[#FF6B57] py-4 px-8 rounded-[1rem] inline-block border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                  {timer}
+
+        <div className="w-14 h-14 bg-[#FF6B57]/10 rounded-2xl border-2 border-black flex items-center justify-center mb-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative z-10">
+          <Video className="h-7 w-7 text-black" />
+        </div>
+
+        {!userData?.googleConnected ? (
+          <div className="text-center space-y-5 relative z-10 w-full">
+            <div>
+              <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight mb-2 leading-none">Connect Google</h3>
+              <p className="text-gray-400 font-bold text-xs sm:text-sm leading-relaxed max-w-sm mx-auto uppercase tracking-wide">
+                To create and join live meetings automatically, please connect your Google account.
+              </p>
+            </div>
+
+            <button
+              onClick={handleConnectGoogle}
+              disabled={loading}
+              className="group w-full inline-flex justify-center items-center gap-3 px-6 py-3 bg-white text-black text-sm font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] disabled:opacity-30 transition-all active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+            >
+              {loading ? (
+                <Loader className="h-4 w-4 animate-spin" />
+              ) : (
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              )}
+              <span>{loading ? 'CONNECTING...' : 'CONNECT ACCOUNT'}</span>
+            </button>
+          </div>
+        ) : (
+          <div className="w-full relative z-10">
+            {classroom.meetingActive ? (
+              <div className="text-center space-y-5 animate-in fade-in duration-500">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FF6B57] text-black border-2 border-black rounded-full text-[9px] font-black uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] animate-pulse">
+                  <div className="w-1.5 h-1.5 bg-black rounded-full" />
+                  Session Active
+                </div>
+
+                <div>
+                  <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Duration</h3>
+                  <div className="text-3xl sm:text-4xl font-black text-black bg-gray-50 py-4 px-8 rounded-2xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(255,107,87,1)] inline-block tabular-nums">
+                    {timer}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <a
+                    href={classroom.meetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex justify-center items-center px-6 py-3 text-black bg-[#FF6B57] text-xs font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+                  >
+                    JOIN SESSION NOW
+                  </a>
+
+                  {isTeacher && (
+                    <button
+                      onClick={handleEndMeeting}
+                      disabled={loading}
+                      className="flex-1 inline-flex justify-center items-center px-6 py-3 text-white bg-black text-xs font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,107,87,1)] hover:bg-red-600 transition-all disabled:opacity-30 active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+                    >
+                      {loading ? <Loader className="h-4 w-4 animate-spin" /> : 'END MEETING'}
+                    </button>
+                  )}
                 </div>
               </div>
-              
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center mt-6">
-                <a
-                  href={classroom.meetingLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex justify-center items-center px-8 py-4 text-black bg-[#FF6B57] text-lg font-extrabold rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-                >
-                  Join Meeting
-                </a>
-                
+            ) : (
+              <div className="text-center space-y-5">
+                <div>
+                  <h3 className="text-xl font-black text-black uppercase tracking-tight mb-2">No Active Meeting</h3>
+                  <p className="text-gray-400 font-bold uppercase tracking-widest text-xs max-w-xs mx-auto">
+                    The instructor hasn't started a live session yet. Check back soon!
+                  </p>
+                </div>
+
                 {isTeacher && (
                   <button
-                    onClick={handleEndMeeting}
+                    onClick={handleStartMeeting}
                     disabled={loading}
-                    className="inline-flex justify-center items-center px-8 py-4 text-white bg-black text-lg font-extrabold rounded-full border-2 border-black shadow-[2px_2px_0px_0px_rgba(255,107,87,1)] hover:bg-gray-800 transition-all disabled:opacity-50"
+                    className="w-full inline-flex justify-center items-center gap-3 px-6 py-3 bg-[#FF6B57] text-black text-sm font-black uppercase tracking-widest rounded-xl border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] disabled:opacity-30 transition-all active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
                   >
-                    End Meeting
+                    {loading ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Video className="w-4 h-4" />
+                    )}
+                    <span>{loading ? 'PREPARING...' : 'START LIVE CLASS'}</span>
                   </button>
                 )}
               </div>
-            </div>
-          ) : (
-            <div className="text-center w-full max-w-md bg-[#FAFAFA] p-10 rounded-[1.5rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <h3 className="text-2xl font-extrabold text-black mb-4">No Active Meeting</h3>
-              <p className="text-gray-500 font-bold text-lg mb-8">The instructor hasn't started a live session yet.</p>
-              
-              {isTeacher && (
-                <button
-                  onClick={handleStartMeeting}
-                  disabled={loading}
-                  className="w-full inline-flex justify-center items-center px-8 py-4 text-white bg-black text-lg font-extrabold rounded-full border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,107,87,1)] hover:-translate-y-1 transition-all disabled:opacity-50"
-                >
-                  <Video className="w-6 h-6 mr-3" />
-                  Start Live Meeting
-                </button>
-              )}
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

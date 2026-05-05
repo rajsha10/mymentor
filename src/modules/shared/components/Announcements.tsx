@@ -4,6 +4,7 @@ import { db } from '../../../config/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
 import { sendNotification } from '../../../services/notificationService';
 import { format } from 'date-fns';
+import { Bell, Megaphone, Send, Clock, Loader } from 'lucide-react';
 
 export default function Announcements({ classroomId, isTeacher }: { classroomId: string, isTeacher: boolean }) {
   const { user, userData } = useAuth();
@@ -58,54 +59,78 @@ export default function Announcements({ classroomId, isTeacher }: { classroomId:
   };
 
   return (
-    <div className="space-y-8 p-6 sm:p-10">
+    <div className="space-y-10 p-4 sm:p-8 lg:p-12">
       {isTeacher && (
-        <div className="bg-white p-8 rounded-[2rem] border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-          <h3 className="text-2xl font-extrabold text-black mb-4">Post an Announcement</h3>
-          <form onSubmit={handlePost}>
+        <div className="bg-white p-6 sm:p-10 rounded-[2.5rem] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+          {/* Decorative background for teacher input */}
+          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+             <Bell className="h-24 w-24" />
+          </div>
+          
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(255,107,87,1)]">
+              <Megaphone className="h-5 w-5 text-white" />
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">Post Announcement</h3>
+          </div>
+
+          <form onSubmit={handlePost} className="relative z-10">
             <textarea
-              className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400 text-lg"
+              className="w-full px-6 py-5 border-4 border-black rounded-[1.5rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-all bg-[#FAFAFA] placeholder-gray-400 text-lg font-bold shadow-inner"
               rows={3}
               placeholder="Share something with your class..."
               value={newAnnouncement}
               onChange={(e) => setNewAnnouncement(e.target.value)}
             ></textarea>
-            <div className="mt-4 flex justify-end">
+            <div className="mt-6 flex justify-end">
               <button
                 type="submit"
                 disabled={!newAnnouncement.trim() || loading}
-                className="bg-[#FF6B57] text-black px-8 py-3 rounded-full font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group flex items-center gap-2 bg-[#FF6B57] text-black px-10 py-4 rounded-2xl font-black uppercase tracking-widest border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] focus:outline-none transition-all active:shadow-none active:translate-x-1 active:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Posting...' : 'Post'}
+                {loading ? (
+                  <Loader className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                )}
+                <span>{loading ? 'Posting...' : 'Post Now'}</span>
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {announcements.length === 0 ? (
-          <div className="text-center py-16 bg-[#FAFAFA] rounded-[2rem] border-2 border-black border-dashed">
-            <p className="text-xl font-bold text-black mb-2">No announcements yet</p>
-            <p className="text-gray-500 font-medium">When teachers post updates, they will appear here.</p>
+          <div className="text-center py-24 bg-white rounded-[3rem] border-4 border-black border-dashed opacity-60">
+            <div className="w-20 h-20 bg-gray-50 border-4 border-dashed border-black/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Bell className="h-10 w-10 text-gray-300" />
+            </div>
+            <p className="text-2xl font-black text-black uppercase tracking-tight mb-2">No announcements yet</p>
+            <p className="text-gray-400 font-bold uppercase tracking-wide text-sm">Updates from teachers will appear here.</p>
           </div>
         ) : (
           announcements.map((ann) => (
-            <div key={ann.id} className="bg-white p-8 rounded-[2rem] border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex justify-between items-start mb-4">
+            <div key={ann.id} className="group bg-white p-6 sm:p-10 rounded-[2.5rem] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all">
+              <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center">
-                  <div className="h-12 w-12 rounded-full border-2 border-black bg-[#FAFAFA] flex items-center justify-center text-black font-extrabold mr-4 text-xl shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="h-14 w-14 rounded-2xl border-4 border-black bg-[#FF6B57]/10 flex items-center justify-center text-black font-black text-2xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] group-hover:bg-[#FF6B57] transition-colors">
                     {ann.authorName?.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="font-extrabold text-black text-lg">{ann.authorName}</p>
-                    <p className="text-sm font-bold text-gray-500 tracking-wide">
-                      {ann.timestamp?.toDate ? format(ann.timestamp.toDate(), 'MMM d, yyyy h:mm a') : 'Just now'}
-                    </p>
+                  <div className="ml-5">
+                    <p className="font-black text-black text-xl uppercase tracking-tight">{ann.authorName}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                       <Clock className="h-3.5 w-3.5 text-[#FF6B57]" />
+                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                         {ann.timestamp?.toDate ? format(ann.timestamp.toDate(), 'MMM d, yyyy • h:mm a') : 'Just now'}
+                       </p>
+                    </div>
                   </div>
                 </div>
               </div>
-              <p className="text-black font-medium text-lg whitespace-pre-wrap mt-4 leading-relaxed">{ann.text}</p>
+              <div className="bg-gray-50/50 p-6 rounded-[1.5rem] border-2 border-black/5">
+                 <p className="text-black font-bold text-lg whitespace-pre-wrap leading-relaxed">{ann.text}</p>
+              </div>
             </div>
           ))
         )}

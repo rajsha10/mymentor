@@ -67,46 +67,46 @@ export default function CreateClassroom({ onCreated }: { onCreated: () => void }
 
   return (
     <div>
-      <h2 className="text-3xl font-extrabold text-black mb-6">Create New Classroom</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-black uppercase tracking-wider">Class Name</label>
+      <h2 className="text-xl font-extrabold text-black mb-4">Create New Classroom</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold text-black uppercase tracking-wider">Class Name</label>
             <input
               type="text"
               required
-              className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400"
+              className="w-full px-4 py-2.5 border-2 border-black rounded-xl focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400 text-sm"
               placeholder="e.g. Physics 101"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-black uppercase tracking-wider">Subject</label>
+          <div className="space-y-1.5">
+            <label className="block text-[10px] font-bold text-black uppercase tracking-wider">Subject</label>
             <input
               type="text"
               required
-              className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400"
+              className="w-full px-4 py-2.5 border-2 border-black rounded-xl focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400 text-sm"
               placeholder="e.g. Science"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
             />
           </div>
         </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-black uppercase tracking-wider">Description</label>
+        <div className="space-y-1.5">
+          <label className="block text-[10px] font-bold text-black uppercase tracking-wider">Description</label>
           <textarea
-            className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400"
+            className="w-full px-4 py-2.5 border-2 border-black rounded-xl focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] placeholder-gray-400 text-sm"
             placeholder="Briefly describe what this class is about..."
-            rows={3}
+            rows={2}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-black uppercase tracking-wider">Visibility</label>
+        <div className="space-y-1.5">
+          <label className="block text-[10px] font-bold text-black uppercase tracking-wider">Visibility</label>
           <select
-            className="w-full px-5 py-4 border-2 border-black rounded-[1rem] focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA]"
+            className="w-full px-4 py-2.5 border-2 border-black rounded-xl focus:outline-none focus:ring-0 focus:border-[#FF6B57] transition-colors bg-[#FAFAFA] text-sm"
             value={visibility}
             onChange={(e) => setVisibility(e.target.value)}
           >
@@ -117,7 +117,7 @@ export default function CreateClassroom({ onCreated }: { onCreated: () => void }
         <button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto inline-flex justify-center items-center px-10 py-4 border-2 border-black text-lg font-bold rounded-full text-white bg-black hover:bg-gray-800 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+          className="w-full sm:w-auto inline-flex justify-center items-center px-8 py-2.5 border-2 border-black text-sm font-bold rounded-full text-white bg-black hover:bg-gray-800 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         >
           {loading ? 'Creating...' : 'Create Classroom'}
         </button>

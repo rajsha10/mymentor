@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { listStudentTests, type StudentTestSummary, type SubmitTestResult } from '../../../services/backendApi';
 import StudentTestAttempt from './StudentTestAttempt';
-import { FlaskConical, Loader, Trophy, CheckCircle, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
+import StudentTestResults from './StudentTestResults';
+import { FlaskConical, Loader, Trophy, CheckCircle, Clock, AlertTriangle, RefreshCw, Eye } from 'lucide-react';
 
 interface Props {
   classId: number;  // numeric Supabase class_id
@@ -31,6 +32,8 @@ export default function StudentTestList({ classId }: Props) {
   const [error, setError] = useState('');
   const [attemptingId, setAttemptingId] = useState<number | null>(null);
   const [attemptingTopic, setAttemptingTopic] = useState('');
+  const [viewingResultId, setViewingResultId] = useState<number | null>(null);
+  const [viewingResultTopic, setViewingResultTopic] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -176,6 +179,14 @@ export default function StudentTestList({ classId }: Props) {
                           (t.score ?? 0) >= 60 ? 'text-yellow-500' : 'text-red-400'
                         }`} />
                       )}
+                      <button
+                        onClick={() => { setViewingResultId(t.id); setViewingResultTopic(t.topic); }}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-white text-black font-extrabold text-sm rounded-xl border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-50 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                        title="View answers & results"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        Review
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -191,6 +202,15 @@ export default function StudentTestList({ classId }: Props) {
           testId={attemptingId}
           topic={attemptingTopic}
           onClose={handleAttemptClose}
+        />
+      )}
+
+      {/* Results viewer modal */}
+      {viewingResultId !== null && (
+        <StudentTestResults
+          testId={viewingResultId}
+          topic={viewingResultTopic}
+          onClose={() => { setViewingResultId(null); setViewingResultTopic(''); }}
         />
       )}
     </div>
