@@ -4,27 +4,25 @@ import { auth, db } from '../../../config/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
-import CreateClassroom from '../components/CreateClassroom';
 import NotificationsPanel from '../../shared/components/NotificationsPanel';
 import Profile from '../../shared/pages/Profile';
-import { 
-  Bell, 
-  BookOpen, 
-  User, 
-  LayoutDashboard, 
-  LogOut, 
-  Video, 
-  Home, 
-  Plus, 
+import {
+  Bell,
+  BookOpen,
+  User,
+  LayoutDashboard,
+  LogOut,
+  Video,
+  Home,
   Users,
   Calendar,
-  Sparkles
+  Sparkles,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function TeacherDashboard() {
   const { user, userData } = useAuth();
   const [classrooms, setClassrooms] = useState<any[]>([]);
-  const [showCreate, setShowCreate] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'classrooms' | 'profile'>('overview');
 
   useEffect(() => {
@@ -120,20 +118,17 @@ export default function TeacherDashboard() {
 
         <div className="bg-white rounded-3xl border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] p-6 flex flex-col items-center justify-center text-center space-y-4">
           <div className="w-16 h-16 bg-gray-100 rounded-full border-2 border-black flex items-center justify-center">
-            <Plus className="h-8 w-8 text-black" />
+            <ShieldCheck className="h-8 w-8 text-black" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-black mb-1">Start a New Class</h3>
-            <p className="text-gray-500 text-sm font-medium">Create a new virtual learning space for your students.</p>
+            <h3 className="text-xl font-black text-black mb-1">Classrooms by Admin</h3>
+            <p className="text-gray-500 text-sm font-medium">Classrooms are created and assigned to you by the administrator.</p>
           </div>
           <button
-            onClick={() => {
-              setActiveTab('classrooms');
-              setShowCreate(true);
-            }}
+            onClick={() => setActiveTab('classrooms')}
             className="px-6 py-2.5 bg-[#FF6B57] text-black text-sm font-black rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
           >
-            Create Classroom
+            View My Classrooms
           </button>
         </div>
       </div>
@@ -144,19 +139,7 @@ export default function TeacherDashboard() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-2xl font-black text-black">Your Classrooms</h2>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className={`inline-flex items-center px-5 py-2.5 ${showCreate ? 'bg-white' : 'bg-[#FF6B57]'} text-black text-xs font-black rounded-full border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF8A7A] transition-all`}
-        >
-          {showCreate ? 'Cancel' : <><Plus className="h-4 w-4 mr-2" /> Create Classroom</>}
-        </button>
       </div>
-
-      {showCreate && (
-        <div className="p-6 bg-white border-2 border-black rounded-3xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-6">
-          <CreateClassroom onCreated={() => setShowCreate(false)} />
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {classrooms.map((classroom) => (
@@ -200,13 +183,13 @@ export default function TeacherDashboard() {
           </Link>
         ))}
         
-        {classrooms.length === 0 && !showCreate && (
+        {classrooms.length === 0 && (
           <div className="col-span-full py-16 bg-white rounded-3xl border-2 border-black border-dashed flex flex-col items-center justify-center text-center px-4">
             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center border border-black mb-4">
               <BookOpen className="h-8 w-8 text-black/20" />
             </div>
-            <p className="text-xl font-black text-black mb-1">No classrooms yet</p>
-            <p className="text-gray-500 text-sm font-bold max-w-xs">Start your teaching journey by creating your first virtual classroom.</p>
+            <p className="text-xl font-black text-black mb-1">No classrooms assigned yet</p>
+            <p className="text-gray-500 text-sm font-bold max-w-xs">The administrator will assign classrooms to you. Check back soon.</p>
           </div>
         )}
       </div>

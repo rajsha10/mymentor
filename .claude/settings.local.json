@@ -6,7 +6,14 @@
       "Bash(Get-ChildItem -Path \"d:\\\\final year\\\\MyMentor whole\\\\mymentor\" -Force)",
       "Bash(Select-Object Name, FullName)",
       "Bash(npx tsc *)",
-      "Bash(grep -E \"\\\\.\\(tsx|ts|jsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(tsx|ts|jsx\\)$\")",
+      "Bash(grep -rho \"collection\\(db, \\\\`classrooms/\\\\${[^}]*}/[^}]*\\\\`\\)\" \"d:\\\\final year\\\\MyMentor whole\\\\mymentor\\\\src\" --include=\"*.ts\" --include=\"*.tsx\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\final year\\\\MyMentor whole\\\\mymentor\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\final year\\\\MyMentor whole\\\\mymentor\\\\src\\\\modules\" -Directory | ForEach-Object { $_.Name })",
+      "Bash(npm install *)",
+      "Bash(cat .env)",
+      "Bash(cat .env.local)"
     ]
   }
 }

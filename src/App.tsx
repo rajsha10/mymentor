@@ -38,7 +38,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     if (isAdmin) return <Navigate to="/admin-dashboard" replace />;
     if (userData?.role === 'teacher') return <Navigate to="/teacher-dashboard" replace />;
     if (userData?.role === 'student') return <Navigate to="/student-dashboard" replace />;
-    // user set but userData not resolved yet — wait for Firestore
+    // loading resolved but no Firestore doc (e.g. Google user who hasn't completed signup)
+    if (!loading) return <>{children}</>;
     return <LoadingScreen />;
   }
 

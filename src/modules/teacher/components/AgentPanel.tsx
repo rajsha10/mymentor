@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createAgent, listAgents, listDocuments, addDocument, deleteDocument, deleteAgent } from '../../../services/backendApi';
 import {
   Bot, Plus, CheckCircle, AlertCircle, Loader,
-  UploadCloud, FileText, Trash2, RefreshCw, MessageSquare, ArrowLeft, X, Eye, EyeOff
+  UploadCloud, FileText, Trash2, RefreshCw, MessageSquare, ArrowLeft, X, Eye, EyeOff, Activity
 } from 'lucide-react';
 import AgentChat from './AgentChat';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
