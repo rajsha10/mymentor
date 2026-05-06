@@ -208,7 +208,7 @@ export default function ClassroomView() {
       </nav>
 
       {/* ── Body (sidebar + content) ── */}
-      <div className="flex flex-1 relative overflow-hidden">
+      <div className="flex flex-1 relative overflow-hidden lg:pl-[19rem]">
 
         {/* Left Sidebar — all users */}
         <>
@@ -226,11 +226,12 @@ export default function ClassroomView() {
               className={`
                 fixed top-0 left-0 h-screen w-72
                 bg-white border-r-4 border-black
-                overflow-y-auto z-50
+                overflow-y-auto scrollbar-hide z-50
                 transition-transform duration-300 ease-in-out
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                lg:sticky lg:top-[3.75rem] lg:h-[calc(100vh-3.75rem)] lg:z-auto
-                lg:ml-4 lg:mt-4 lg:rounded-[2rem] lg:border-y-4 lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
+                lg:left-4 lg:top-[calc(50%+2rem)] lg:-translate-y-1/2
+                lg:h-auto lg:max-h-[calc(100vh-6rem)] lg:w-[17rem]
+                lg:rounded-[2rem] lg:border-4 lg:border-black lg:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]
               `}
             >
               {/* Mobile header */}

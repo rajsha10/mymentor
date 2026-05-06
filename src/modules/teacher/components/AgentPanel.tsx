@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createAgent, listAgents, listDocuments, addDocument, deleteDocument, deleteAgent } from '../../../services/backendApi';
 import {
   Bot, Plus, CheckCircle, AlertCircle, Loader,
-  UploadCloud, FileText, Trash2, RefreshCw, MessageSquare, ArrowLeft, X, Eye, EyeOff, Activity
+  UploadCloud, FileText, Trash2, RefreshCw, MessageSquare, ArrowLeft, X, Activity
 } from 'lucide-react';
 import AgentChat from './AgentChat';
 import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -521,12 +521,24 @@ export default function AgentPanel({
 
               {/* Visibility & Delete Controls */}
               <div className="flex items-center justify-between pt-3 border-t-2 border-black/5">
-                <button
-                  onClick={() => handleToggleVisibility(a.agent_id)}
-                  className="text-[8px] font-black uppercase tracking-widest text-gray-400 hover:text-black flex items-center gap-1.5 transition-colors"
-                >
-                  {visibleAgentIds.includes(a.agent_id) ? <><EyeOff className="h-3 w-3" /> Hide</> : <><Eye className="h-3 w-3" /> Grant Access</>}
-                </button>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleVisibility(a.agent_id)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full border-2 border-black transition-colors focus:outline-none ${
+                      visibleAgentIds.includes(a.agent_id) ? 'bg-black' : 'bg-white'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full border-2 border-black bg-white transition-transform ${
+                        visibleAgentIds.includes(a.agent_id) ? 'translate-x-4' : 'translate-x-0.5'
+                      }`}
+                    />
+                  </button>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-gray-400">
+                    {visibleAgentIds.includes(a.agent_id) ? 'Public' : 'Private'}
+                  </span>
+                </div>
                 {!a.bot_type && (
                   <button
                     onClick={() => setConfirmDeleteId(a.agent_id)}
