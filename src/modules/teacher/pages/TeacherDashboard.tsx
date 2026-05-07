@@ -17,7 +17,9 @@ import {
   Users,
   Calendar,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Lock,
+  Clock
 } from 'lucide-react';
 
 export default function TeacherDashboard() {
@@ -50,11 +52,132 @@ export default function TeacherDashboard() {
 
   if (userData && !userData.approved) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] p-4">
-        <div className="max-w-md w-full p-8 bg-white rounded-3xl border border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-center">
-          <h2 className="text-2xl tracking-tight font-extrabold text-black mb-3">Waiting for Approval</h2>
-          <p className="text-gray-600 mb-6 font-medium text-sm">Your account is pending administrator approval. You will gain access once approved.</p>
-          <button onClick={handleLogout} className="px-5 py-2.5 border-2 border-black rounded-full font-bold hover:bg-gray-100 transition-colors text-sm">Logout</button>
+      <div className="min-h-screen bg-[#FAFAFA] flex font-sans text-black selection:bg-[#FF6B57] selection:text-black">
+        {/* Locked Sidebar */}
+        <aside className="w-64 bg-white border-r-2 border-black hidden lg:flex flex-col sticky top-0 h-screen z-30 opacity-50 pointer-events-none select-none">
+          <div className="p-6 border-b-2 border-black">
+            <img src="/logo.png" alt="MyMentor Logo" className="h-20 w-auto object-contain" />
+          </div>
+          <nav className="flex-1 p-4 space-y-3">
+            <div className="w-full flex items-center px-4 py-3 rounded-xl border-2 bg-black text-white border-black font-black text-xs">
+              <Home className="h-4 w-4 mr-3" />
+              Overview
+            </div>
+            <div className="w-full flex items-center px-4 py-3 rounded-xl border-2 border-transparent text-black font-black text-xs">
+              <LayoutDashboard className="h-4 w-4 mr-3" />
+              Classrooms
+            </div>
+            <div className="w-full flex items-center px-4 py-3 rounded-xl border-2 border-transparent text-black font-black text-xs">
+              <User className="h-4 w-4 mr-3" />
+              My Profile
+            </div>
+          </nav>
+          <div className="p-4 border-t-2 border-black bg-gray-50">
+            <div className="flex items-center space-x-2 mb-4 px-1">
+              <div className="w-8 h-8 rounded-full border border-black bg-[#FF6B57] flex items-center justify-center font-black text-xs">
+                {userData?.name?.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black text-black truncate">{userData?.name}</p>
+                <p className="text-[9px] font-black text-gray-400 uppercase tracking-wider">{userData?.subject}</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-w-0 relative">
+          {/* Mobile Header */}
+          <header className="lg:hidden bg-white border-b-2 border-black px-4 py-3 flex justify-between items-center sticky top-0 z-40">
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="MyMentor Logo" className="h-10 w-auto object-contain" />
+              <h1 className="text-lg font-black tracking-tight">Teacher</h1>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg border-2 border-black bg-white text-black hover:bg-red-50 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </header>
+
+          {/* Blurred ghost content */}
+          <main
+            className="flex-1 overflow-hidden relative bg-[#FAFAFA]"
+            style={{ backgroundImage: 'radial-gradient(#e5e7eb 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}
+          >
+            {/* Ghost dashboard content (blurred) */}
+            <div className="blur-sm pointer-events-none select-none opacity-40 max-w-5xl mx-auto py-8 px-4 lg:px-8 space-y-6">
+              <div className="bg-[#FF6B57] p-6 rounded-3xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                <h2 className="text-2xl font-black text-black mb-1">Welcome back, {userData?.name}! 👋</h2>
+                <p className="text-black/80 font-bold text-base">Ready to inspire your students today?</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {[{ label: 'Total Classes', color: 'bg-blue-100', val: '—' }, { label: 'Total Students', color: 'bg-green-100', val: '—' }, { label: 'Pending Requests', color: 'bg-yellow-100', val: '—' }].map(({ label, color, val }) => (
+                  <div key={label} className="bg-white p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                    <div className={`w-10 h-10 ${color} rounded-xl border border-black mb-3`} />
+                    <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1">{label}</p>
+                    <p className="text-2xl font-black text-black">{val}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-3xl border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] h-48" />
+                <div className="bg-white rounded-3xl border-2 border-black shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] h-48" />
+              </div>
+            </div>
+
+            {/* Approval overlay */}
+            <div className="absolute inset-0 flex items-center justify-center p-4 z-20">
+              <div className="max-w-md w-full bg-white rounded-3xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                {/* Top accent bar */}
+                <div className="bg-[#FF6B57] px-6 py-4 border-b-2 border-black flex items-center gap-3">
+                  <div className="w-9 h-9 bg-white rounded-full border-2 border-black flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-4 w-4 text-black" />
+                  </div>
+                  <p className="font-black text-black text-sm uppercase tracking-wider">Account Under Review</p>
+                </div>
+
+                <div className="p-8 text-center space-y-5">
+                  <div className="w-20 h-20 bg-gray-50 rounded-full border-2 border-black flex items-center justify-center mx-auto shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <Lock className="h-9 w-9 text-black" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-black mb-2">Dashboard Locked</h2>
+                    <p className="text-gray-600 text-sm font-medium leading-relaxed">
+                      Your teacher account is pending administrator approval. Your dashboard is ready — it will unlock automatically once approved.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#FAFAFA] rounded-2xl border-2 border-black p-4 text-left space-y-2">
+                    {[
+                      { icon: <ShieldCheck className="h-4 w-4 text-green-600" />, text: 'Account created successfully', done: true },
+                      { icon: <Clock className="h-4 w-4 text-yellow-500" />, text: 'Awaiting admin approval', done: false },
+                      { icon: <Lock className="h-4 w-4 text-gray-400" />, text: 'Dashboard access', done: false },
+                    ].map(({ icon, text, done }, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 ${done ? 'border-green-500 bg-green-50' : 'border-gray-300 bg-white'}`}>
+                          {icon}
+                        </div>
+                        <span className={`text-xs font-bold ${done ? 'text-black' : 'text-gray-400'}`}>{text}</span>
+                        {!done && i === 1 && (
+                          <span className="ml-auto text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-yellow-100 border border-yellow-400 rounded-full text-yellow-700">Pending</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-center gap-2 px-5 py-2.5 border-2 border-black rounded-full font-black text-sm hover:bg-gray-50 transition-colors shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     );

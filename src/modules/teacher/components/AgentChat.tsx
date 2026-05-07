@@ -229,9 +229,9 @@ export default function AgentChat({ agentId, agentName, onBack }: Props) {
                         p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
                         strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                         em: ({ children }) => <em className="italic">{children}</em>,
-                        ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 my-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 my-1">{children}</ol>,
-                        li: ({ children }) => <li>{children}</li>,
+                        ul: ({ children }) => <ul className="list-disc pl-5 space-y-1 my-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1 my-1">{children}</ol>,
+                        li: ({ children }) => <li className="leading-snug">{children}</li>,
                         code: ({ children }) => <code className="bg-gray-100 px-1 rounded text-xs font-mono">{children}</code>,
                       }}
                     >

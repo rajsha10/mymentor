@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { GoogleAuthProvider, linkWithPopup, reauthenticateWithPopup } from 'firebase/auth';
 import { db, auth, googleProvider } from '../../../config/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
 import { sendNotification } from '../../../services/notificationService';
@@ -48,24 +48,44 @@ export default function Meetings({ classroom, isTeacher }: { classroom: any, isT
   }, [user, userData?.googleConnected]);
 
   const handleConnectGoogle = async () => {
+    if (!user) return;
     try {
       setLoading(true);
-      const result = await signInWithPopup(auth, googleProvider);
+      const currentUser = auth.currentUser!;
+      const isLinked = currentUser.providerData.some(p => p.providerId === 'google.com');
+      const result = isLinked
+        ? await reauthenticateWithPopup(currentUser, googleProvider)
+        : await linkWithPopup(currentUser, googleProvider);
+
       const credential = GoogleAuthProvider.credentialFromResult(result);
       const token = credential?.accessToken;
-      
-      if (token) {
-        setGoogleToken(token);
+      if (token) setGoogleToken(token);
+
+      await updateDoc(doc(db, 'users', user.uid), { googleConnected: true });
+    } catch (error: any) {
+      if (error.code === 'auth/unauthorized-domain') {
+        alert(
+          'This domain is not authorized in Firebase.\n\n' +
+          'Fix: Go to Firebase Console → Authentication → Settings → Authorized Domains → Add your Vercel URL.'
+        );
+      } else if (error.code === 'auth/popup-blocked') {
+        alert('Popup was blocked. Please allow popups for this site and try again.');
+      } else if (error.code === 'auth/provider-already-linked') {
+        // Already linked — just re-auth to get a fresh token
+        try {
+          const result = await reauthenticateWithPopup(auth.currentUser!, googleProvider);
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential?.accessToken;
+          if (token) setGoogleToken(token);
+          if (user) await updateDoc(doc(db, 'users', user.uid), { googleConnected: true });
+        } catch (reAuthErr: any) {
+          console.error('Re-auth error:', reAuthErr);
+          alert('Failed to reconnect Google account. Please try again.');
+        }
+      } else {
+        console.error('Error connecting Google:', error);
+        alert('Failed to connect Google account. Please try again.');
       }
-      
-      if (user) {
-        await updateDoc(doc(db, 'users', user.uid), {
-          googleConnected: true
-        });
-      }
-    } catch (error) {
-      console.error("Error connecting Google:", error);
-      alert("Failed to connect Google account.");
     } finally {
       setLoading(false);
     }
@@ -74,23 +94,45 @@ export default function Meetings({ classroom, isTeacher }: { classroom: any, isT
   const handleStartMeeting = async () => {
     try {
       setLoading(true);
-      
+
       let token = googleToken;
 
-      // 1. Get/Refresh Google Access Token (Only if not already in state)
+      // If token lost from state (e.g. page refresh), re-auth silently via popup to get a fresh one
       if (!token) {
-        // Trigger popup only once to get the token, then we reuse it
-        const result = await signInWithPopup(auth, googleProvider);
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        token = credential?.accessToken || null;
-        
-        if (token) {
-          setGoogleToken(token);
+        const currentUser = auth.currentUser;
+        const isLinked = currentUser?.providerData.some(p => p.providerId === 'google.com');
+
+        if (!isLinked) {
+          alert('Please connect your Google account first using the Connect button.');
+          setLoading(false);
+          return;
+        }
+
+        try {
+          const result = await reauthenticateWithPopup(currentUser!, googleProvider);
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          token = credential?.accessToken || null;
+          if (token) setGoogleToken(token);
+        } catch (reAuthErr: any) {
+          if (reAuthErr.code === 'auth/unauthorized-domain') {
+            alert(
+              'This domain is not authorized in Firebase.\n\n' +
+              'Fix: Firebase Console → Authentication → Settings → Authorized Domains → Add your Vercel URL.'
+            );
+          } else if (reAuthErr.code === 'auth/popup-blocked') {
+            alert('Popup was blocked. Please allow popups for this site and try again.');
+          } else {
+            alert('Could not refresh Google access. Please reconnect your Google account.');
+          }
+          setLoading(false);
+          return;
         }
       }
 
       if (!token) {
-        throw new Error("Failed to get Google Access Token. Please make sure Google is connected.");
+        alert('Failed to get Google access token. Please reconnect your Google account.');
+        setLoading(false);
+        return;
       }
 
       // 2. Create Meeting via Google Calendar API

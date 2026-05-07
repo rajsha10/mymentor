@@ -16,6 +16,7 @@ interface UserData {
   section?: string;
   rollNumber?: string;
   subject?: string;
+  googleConnected?: boolean;
 }
 
 interface AuthContextType {

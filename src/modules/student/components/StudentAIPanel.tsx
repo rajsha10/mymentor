@@ -305,9 +305,9 @@ function AgentChatView({
                           p: ({ children }) => <p className="mb-2 last:mb-0 font-medium">{children}</p>,
                           strong: ({ children }) => <strong className="font-black text-black">{children}</strong>,
                           em: ({ children }) => <em className="italic">{children}</em>,
-                          ul: ({ children }) => <ul className="list-disc list-inside space-y-1 my-2 font-medium">{children}</ul>,
-                          ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 my-2 font-medium">{children}</ol>,
-                          li: ({ children }) => <li>{children}</li>,
+                          ul: ({ children }) => <ul className="list-disc pl-5 space-y-1 my-2 font-medium">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1 my-2 font-medium">{children}</ol>,
+                          li: ({ children }) => <li className="leading-snug">{children}</li>,
                           code: ({ children }) => (
                             <code className="bg-black/5 px-1.5 py-0.5 rounded font-bold text-xs font-mono">{children}</code>
                           ),
